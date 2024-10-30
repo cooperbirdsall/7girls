@@ -32,6 +32,7 @@ const Landing = () => {
 
     return () => {
       socket.off("createRoomResponse");
+      socket.off("joinRoomResponse");
     };
   });
 
@@ -106,7 +107,10 @@ const Landing = () => {
             }}
           ></input>
           <button
-            style={{ filter: "drop-shadow(0px 2px 1px lightgray)" }}
+            style={{
+              filter: "drop-shadow(0px 2px 1px lightgray)",
+              marginTop: 10,
+            }}
             onClick={joinGame}
           >
             join game

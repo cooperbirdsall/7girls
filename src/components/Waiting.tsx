@@ -1,9 +1,38 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import socket from "../socket";
 
 const Waiting = () => {
-  const [numPlayersInRoom, setNumPlayersInRoom] = useState(3);
+  const [numPlayersInRoom, setNumPlayersInRoom] = useState(1);
+
+  const location = useLocation();
   const navigate = useNavigate();
+
+  const name = location.state;
+
+  // Handle receiving the response for create room and join room
+  useEffect(() => {
+    socket.emit("onPlayerReady", { name: name });
+
+    socket.on("playerReadyResponse", (response) => {
+      if (response.success) {
+        setNumPlayersInRoom(response.numReadyPlayers);
+      }
+    });
+
+    // socket.on("joinRoomResponse", (response) => {
+    //   if (response.success) {
+    //     const roomID = response.gameID;
+    //     navigate(`/waiting/${roomID}`, { state: name });
+    //   } else {
+    //     setErrorText(response.error);
+    //   }
+    // });
+
+    return () => {
+      // socket.off("joinRoomResponse");
+    };
+  });
 
   const handleStartGame = () => {
     navigate(`/game/`);

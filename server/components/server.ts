@@ -83,7 +83,7 @@ io.on('connection', (socket : Socket) => {
         const gameState = games.get(gameID);
 
         if (!gameID || !gameState) {
-            socket.emit("joinRoomResponse", { error: "bad girl." });
+            socket.emit("joinRoomResponse", { error: `Error: Unable to join game ${gameID}.` });
             return;
         }
 
@@ -104,12 +104,15 @@ io.on('connection', (socket : Socket) => {
         const playerState = games.get(gameID ?? '')?.players.get(socket.id);
 
         if (!gameID || !gameState || !playerState) {
-            console.error("Error: bad girl.");
+            console.error(`Error: Unable to join game ${gameID}.`);
             return;
         }
 
         playerState.name = data.name;
         playerState.isReady = true;
+
+        const readyPlayers = [...gameState.players.values()].filter((playerState: PlayerState) => playerState.isReady);
+        io.to(gameID).emit("playerReadyResponse", { numReadyPlayers: readyPlayers.length, readyPlayers: readyPlayers, success: true });
     });
 
     // Event handler for when a game creator player starts the game
@@ -118,14 +121,14 @@ io.on('connection', (socket : Socket) => {
         const gameState = games.get(gameID ?? '');
 
         if (!gameID || !gameState) {
-            console.error("Error: bad girl.");
+            console.error("Error: Error starting game.");
             return;
         }
 
         const numReadyPlayers: number = [...gameState.players.values()].filter((playerState: PlayerState) => playerState.isReady).length;
 
         if (numReadyPlayers < 3 || numReadyPlayers > 7) {
-            console.error("Error: bad girl.");
+            console.error("Error: Too few or too many players.");
             return;
         }
 
@@ -142,7 +145,7 @@ io.on('connection', (socket : Socket) => {
         const gameState = games.get(gameID);
 
         if (!gameID || !gameState) {
-        console.error(`Error: Bad girl.`);
+        console.error(`Error: Unable to retrieve game state for ${gameID}.`);
         return;
         }
 

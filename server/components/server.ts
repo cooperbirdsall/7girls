@@ -128,7 +128,7 @@ io.on('connection', (socket : Socket) => {
         const numReadyPlayers: number = [...gameState.players.values()].filter((playerState: PlayerState) => playerState.isReady).length;
 
         if (numReadyPlayers < 3 || numReadyPlayers > 7) {
-            console.error("Error: Too few or too many players.");
+            socket.emit("startGameSession", { error: `Error: Too few or too many players.` });
             return;
         }
 

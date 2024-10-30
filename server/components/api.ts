@@ -18,13 +18,14 @@ export const createGameState = (gameID: string) : GameState => {
 
 export type PlayerState = {
     socketID: string,
-    name?: string,
+    name: string | undefined,
     isReady: boolean;
 };
 
 export const createPlayerState = (socketID: string) : PlayerState => {
     return {
         socketID,
+        name: undefined,
         isReady: false
     }
 }

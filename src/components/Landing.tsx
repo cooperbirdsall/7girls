@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import socket from "../socket";
 
@@ -8,6 +8,32 @@ const Landing = () => {
   const [errorText, setErrorText] = useState("");
 
   const navigate = useNavigate();
+
+  // Handle receiving the response for create room and join room
+  useEffect(() => {
+    socket.on("createRoomResponse", (response) => {
+      if (response.success) {
+        const roomID = response.gameID;
+        navigate(`/waiting/${roomID}`, { state: name });
+      } else {
+        setErrorText(response.error);
+        console.error(response.error);
+      }
+    });
+
+    socket.on("joinRoomResponse", (response) => {
+      if (response.success) {
+        const roomID = response.gameID;
+        navigate(`/waiting/${roomID}`, { state: name });
+      } else {
+        setErrorText(response.error);
+      }
+    });
+
+    return () => {
+      socket.off("createRoomResponse");
+    };
+  });
 
   const checkName = (): boolean => {
     if (name.length > 0) {
@@ -19,26 +45,26 @@ const Landing = () => {
     }
   };
 
+  const checkGameCode = (): boolean => {
+    if (gameCode.length > 0) {
+      setErrorText("");
+      return true;
+    } else {
+      setErrorText("that's not a valid game code");
+      return false;
+    }
+  };
+
   const joinGame = () => {
-    if (checkName()) {
-      navigate(`/waiting/`);
-      socket.emit(
-        "createGameRoom",
-        (response: { gameID: string; success?: boolean; error?: string }) => {
-          if (response.success) {
-            const roomID = response.gameID;
-            navigate(`/waiting/${roomID}`);
-          } else {
-            setErrorText("socket error");
-            console.error(response.error);
-          }
-        }
-      );
+    if (checkName() && checkGameCode()) {
+      console.log("emitting");
+      socket.emit("joinGameRoom", { gameID: gameCode });
     }
   };
 
   const createGame = () => {
     if (checkName()) {
+      socket.emit("createGameRoom");
     }
   };
 

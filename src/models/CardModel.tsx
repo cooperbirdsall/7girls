@@ -7,4 +7,5 @@ export type CardModel = {
   symbolCost: Symbol[];
   color: string;
   gain: any;
+  playersRequired: number;
 };

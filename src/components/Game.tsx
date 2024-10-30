@@ -6,7 +6,7 @@ const Game = () => {
   const [players, setPlayers] = useState([<Board />, <Board />]);
 
   useEffect(() => {
-    // distribute boards (which gives everyone 3 coins)
+    // distribute boards (which give everyone 3 coins)
     // shuffle cards for age 1
     // deal 7 age 1 cards to each player
     // call method for wait for players to pick card

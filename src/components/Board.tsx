@@ -40,7 +40,7 @@ const Board = () => {
       // count available
       let availableCount = 0;
       for (let j = 0; j < card.resourceCost.length; j++) {
-        if (currCardResourceType == card.resourceCost[j]) {
+        if (currCardResourceType === card.resourceCost[j]) {
           availableCount++;
         }
       }
@@ -48,12 +48,12 @@ const Board = () => {
       // count needed
       let neededCount = 0;
       for (let k = 0; k < availableResources.length; k++) {
-        if (currCardResourceType == availableResources[k]) {
+        if (currCardResourceType === availableResources[k]) {
           neededCount++;
         }
       }
 
-      // TODO count neighbords resources
+      // TODO count neighbors' resources
 
       if (availableCount < neededCount) return false;
     }

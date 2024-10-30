@@ -21,6 +21,7 @@ const Landing = () => {
 
   const joinGame = () => {
     if (checkName()) {
+      navigate(`/waiting/`);
       socket.emit(
         "createGameRoom",
         (response: { gameID: string; success?: boolean; error?: string }) => {
@@ -42,8 +43,16 @@ const Landing = () => {
   };
 
   return (
-    <div>
-      <h1>7 girls</h1>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "column",
+        height: "100%",
+      }}
+    >
+      <h1 style={{ fontSize: 50 }}>7 girls</h1>
       <input
         type="text"
         placeholder="name"
@@ -52,11 +61,16 @@ const Landing = () => {
           setName(event.target.value);
         }}
       ></input>
-      <div>
+      <div style={{ display: "flex", marginTop: 20, gap: 20 }}>
         <div>
-          <button onClick={createGame}>create game</button>
+          <button
+            style={{ filter: "drop-shadow(0px 2px 1px lightgray)" }}
+            onClick={createGame}
+          >
+            create game
+          </button>
         </div>
-        <div>
+        <div style={{ display: "flex", flexDirection: "column" }}>
           <input
             type="text"
             placeholder="game code"
@@ -65,7 +79,12 @@ const Landing = () => {
               setGameCode(event.target.value);
             }}
           ></input>
-          <button onClick={joinGame}>join game</button>
+          <button
+            style={{ filter: "drop-shadow(0px 2px 1px lightgray)" }}
+            onClick={joinGame}
+          >
+            join game
+          </button>
         </div>
       </div>
       <p style={{ color: "red" }}>{errorText}</p>

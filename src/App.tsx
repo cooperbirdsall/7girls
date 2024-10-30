@@ -11,7 +11,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/waiting" element={<Waiting />} />
+          <Route path="/waiting/:roomID" element={<Waiting />} />
           <Route path="/game" element={<Game />} />
         </Routes>
       </BrowserRouter>

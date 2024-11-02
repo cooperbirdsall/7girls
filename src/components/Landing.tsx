@@ -14,7 +14,7 @@ const Landing = () => {
     socket.on("createRoomResponse", (response) => {
       if (response.success) {
         const roomID = response.gameID;
-        navigate(`/waiting/${roomID}`, { state: name });
+        navigate(`/waiting/${roomID}`, { state: { name: name, isHost: true } });
       } else {
         setErrorText(response.error);
         console.error(response.error);
@@ -24,7 +24,9 @@ const Landing = () => {
     socket.on("joinRoomResponse", (response) => {
       if (response.success) {
         const roomID = response.gameID;
-        navigate(`/waiting/${roomID}`, { state: name });
+        navigate(`/waiting/${roomID}`, {
+          state: { name: name, isHost: false },
+        });
       } else {
         setErrorText(response.error);
       }

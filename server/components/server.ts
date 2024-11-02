@@ -111,7 +111,7 @@ io.on('connection', (socket : Socket) => {
         playerState.name = data.name;
         playerState.isReady = true;
 
-        const readyPlayers = [...gameState.players.values()].filter((playerState: PlayerState) => playerState.isReady);
+        const readyPlayers = [...gameState.players.values()].filter((playerState: PlayerState) => playerState.isReady).map((player: PlayerState) => player.name);
         io.to(gameID).emit("playerReadyResponse", { numReadyPlayers: readyPlayers.length, readyPlayers: readyPlayers, success: true });
     });
 

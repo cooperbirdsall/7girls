@@ -11,7 +11,7 @@ type BoardProps = {
 const Board = () => {
   const [money, setMoney] = useState(3);
   const [cardsPlayed, setCardsPlayed] = useState();
-  //   const [cardsInHand, setCardsInHand] = useState([] : CardModel[]);
+  const [cardsInHand, setCardsInHand] = useState<CardModel[]>([]);
   const [warScore, setWarScore] = useState(0);
   const [pyramidStagesUnlocked, setPyramidStagesUnlocked] = useState([]);
 
@@ -35,27 +35,29 @@ const Board = () => {
   const canPlayCard = (card: CardModel) => {
     let availableResources: Resource[] = getAvailableResources();
 
-    for (let i = 0; i < card.resourceCost.length; i++) {
-      const currCardResourceType = card.resourceCost[i];
-      // count available
-      let availableCount = 0;
-      for (let j = 0; j < card.resourceCost.length; j++) {
-        if (currCardResourceType === card.resourceCost[j]) {
-          availableCount++;
+    if (card.cost.resource) {
+      for (let i = 0; i < card.cost.resource.length; i++) {
+        const currCardResourceType = card.cost.resource[i];
+        // count available
+        let availableCount = 0;
+        for (let j = 0; j < card.cost.resource.length; j++) {
+          if (currCardResourceType === card.cost.resource[j]) {
+            availableCount++;
+          }
         }
-      }
 
-      // count needed
-      let neededCount = 0;
-      for (let k = 0; k < availableResources.length; k++) {
-        if (currCardResourceType === availableResources[k]) {
-          neededCount++;
+        // count needed
+        let neededCount = 0;
+        for (let k = 0; k < availableResources.length; k++) {
+          if (currCardResourceType === availableResources[k]) {
+            neededCount++;
+          }
         }
+
+        // TODO count neighbors' resources
+
+        if (availableCount < neededCount) return false;
       }
-
-      // TODO count neighbors' resources
-
-      if (availableCount < neededCount) return false;
     }
     return true;
   };

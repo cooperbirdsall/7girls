@@ -4,14 +4,16 @@ import socket from "../socket";
 
 const Waiting = () => {
   const [numPlayersInRoom, setNumPlayersInRoom] = useState(1);
-  const [playersInRoom, setPlayersInRoom] = useState([]);
+  const [playersInRoom, setPlayersInRoom] = useState([""]);
   const [errorText, setErrorText] = useState("");
 
   const location = useLocation();
   const navigate = useNavigate();
 
   const { roomID } = useParams();
-  const name = location.state;
+  const { name, isHost } = location.state;
+
+  const playerNames = playersInRoom.map((player) => <li>{player}</li>);
 
   // Handle receiving the response for create room and join room
   useEffect(() => {
@@ -57,7 +59,8 @@ const Waiting = () => {
         </span>{" "}
         player{numPlayersInRoom === 1 ? "" : "s"} connected
       </h3>
-      <button onClick={handleStartGame}>Start game</button>
+      <ol>{playerNames}</ol>
+      {isHost && <button onClick={handleStartGame}>Start game</button>}
       <p style={{ color: "red" }}>{errorText}</p>
     </div>
   );

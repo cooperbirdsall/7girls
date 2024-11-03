@@ -7,7 +7,6 @@ export type GameState = {
     hasStarted: boolean,
     players: Map<string, PlayerState>,
     currentAge: number,
-    cardsPerHand: number,
 };
 
 export const createGameState = (gameID: string) : GameState => {
@@ -16,7 +15,6 @@ export const createGameState = (gameID: string) : GameState => {
         hasStarted: false,
         players: new Map<string, PlayerState>(),
         currentAge: 1,
-        cardsPerHand: 7,
     }
 }
 
@@ -24,8 +22,12 @@ export type PlayerState = {
     socketID: string;
     name: string | undefined;
     isReady: boolean;
-    board: BoardModel;
+    board: BoardModel | undefined;
     cardsInHand: CardModel[];
+    militaryWins: number[];
+    militaryLosses: number[];
+    playerOnLeft: string;
+    playerOnRight: string;
 };
 
 export const createPlayerState = (socketID: string) : PlayerState => {
@@ -33,22 +35,92 @@ export const createPlayerState = (socketID: string) : PlayerState => {
         socketID,
         name: undefined,
         isReady: false,
-        board: {},
-        cardsInHand: []
+        board: undefined,
+        cardsInHand: [],
+        militaryWins: [],
+        militaryLosses: [],
+        playerOnLeft: "",
+        playerOnRight: ""
     }
 }
 
 export const initializeGame = async (gameState: GameState) => {
-    const playerSockets = Object.keys(gameState.players);
-
-    for (const socket of playerSockets) {
-        // deal boards
-        // deal cards?
+    let map : string[] = [];
+    for (const [playerID, _] of gameState.players) {
+        map.push(playerID); 
     }
+    for (let i = 0; i < map.length; i++) {
+        const player = gameState.players.get(map[i]);
+        if (player) {
+            if (i === 0) {
+                player.playerOnLeft = map[map.length - 1];
+                player.playerOnRight = map[i + 1];
+            } else if (i === map.length - 1) {
+                player.playerOnLeft = map[i - 1]
+                player.playerOnRight = map[0];
+            } else {
+                player.playerOnLeft = map[i - 1];
+                player.playerOnRight = map[i + 1];
+            }
+        }
+    }
+
+    startAge(gameState);
 }
 
-export const initializeAge = async () => {
+export const startAge = async (gameState: GameState) => {
+    dealHands(gameState);
+}
 
+/**
+ * Score the military at the end of the round
+ * Advance the age up 1
+ * 
+ * gameState: the current state of the game
+ */
+export const endAge = async (gameState: GameState) => {
+    for (const [_, player] of gameState.players) {
+        let playerVersusPlayerLeft = player.board?.militaryPoints ?? 0 - (gameState.players.get(player.playerOnLeft)?.board?.militaryPoints ?? 0);
+        let playerVersusPlayerRight = player.board?.militaryPoints ?? 0 - (gameState.players.get(player.playerOnRight)?.board?.militaryPoints ?? 0);
+        
+        let playerWins = 0;
+        let playerLosses = 0;
+        if (playerVersusPlayerLeft > 0) {
+            playerWins++;
+        } else if (playerVersusPlayerLeft < 0) {
+            playerLosses++;
+        }
+
+        if (playerVersusPlayerRight > 0) {
+            playerWins++;
+        } else if (playerVersusPlayerRight < 0) {
+            playerLosses++;
+        }
+
+        let militaryValue = 0;
+        switch (gameState.currentAge) {
+            case 1:
+                militaryValue = 1;
+                break;
+            case 2:
+                militaryValue = 3;
+                break;
+            case 3:
+                militaryValue = 5;
+            default:
+                break;
+        }
+
+        for (let i = 0; i < playerWins; i++) {
+            player.militaryWins.push(militaryValue);
+        }
+
+        for (let i = 0; i < playerLosses; i++) {
+            player.militaryLosses.push(militaryValue);
+        }
+    }
+
+    gameState.currentAge++;
 }
 
 export const dealHands = async (gameState: GameState) => {

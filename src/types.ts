@@ -2,6 +2,7 @@ type BasicResource = "WOOD" | "ORE" | "STEEL" | "BRICK";
 type FancyResource = "GLASS" | "RUG" | "PAPER";
 
 export type OneOfResource = Resource[];
+export type OneOfScience = Science[];
 
 export type Resource = BasicResource | FancyResource | OneOfResource;
 
@@ -15,7 +16,7 @@ export type CardGain = {
   money?: number;
   military?: number;
   resource?: Resource[];
-  science?: Science;
+  science?: Science | OneOfScience;
   func?: Function;
   points?: number;
   symbol?: Symbol[];
@@ -51,5 +52,5 @@ export type Science = "WHEEL" | "PROTRACTOR" | "TABLET"
 
 export type PyramidStage = {
   cost: Resource[];
-  gain: Resource[];
+  gain: CardGain;
 }

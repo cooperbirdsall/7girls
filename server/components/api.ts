@@ -7,6 +7,7 @@ export type GameState = {
     hasStarted: boolean,
     players: Map<string, PlayerState>,
     currentAge: number,
+    cardDirectionClockwise: boolean
 };
 
 export const createGameState = (gameID: string) : GameState => {
@@ -15,6 +16,7 @@ export const createGameState = (gameID: string) : GameState => {
         hasStarted: false,
         players: new Map<string, PlayerState>(),
         currentAge: 1,
+        cardDirectionClockwise: true,
     }
 }
 
@@ -121,6 +123,7 @@ export const endAge = async (gameState: GameState) => {
     }
 
     gameState.currentAge++;
+    gameState.cardDirectionClockwise = !gameState.cardDirectionClockwise;
 }
 
 export const dealHands = async (gameState: GameState) => {
@@ -143,5 +146,20 @@ export const dealHands = async (gameState: GameState) => {
             player.cardsInHand.push(cards[nextCard]);
             dealtCards.add(nextCard);
         }
+    }
+}
+
+export const passCards = async (gameState: GameState) => {
+    let newCards = new Map<string, CardModel[]>;
+    for (const [playerID, player] of gameState.players) {
+        if (gameState.cardDirectionClockwise) {
+            newCards.set(playerID, gameState.players.get(player.playerOnRight)?.cardsInHand ?? []);
+        } else {
+            newCards.set(playerID, gameState.players.get(player.playerOnLeft)?.cardsInHand ?? []);
+        }
+    }
+
+    for (const [playerID, player] of gameState.players) {
+        player.cardsInHand = newCards.get(playerID) ?? [];
     }
 }

@@ -109,6 +109,7 @@ export const endAge = async (gameState: GameState) => {
                 break;
             case 3:
                 militaryValue = 5;
+                break;
             default:
                 break;
         }

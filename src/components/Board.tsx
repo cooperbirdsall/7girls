@@ -2,13 +2,9 @@ import { useState } from "react";
 import { PyramidStage, Resource } from "../types";
 import Card from "./Card";
 import { CardModel } from "../models/CardModel";
+import { BoardModel } from "../models/BoardModel";
 
-type BoardProps = {
-  startResource: Resource;
-  pyramidStages: PyramidStage[];
-};
-
-const Board = () => {
+const Board = (props: { model: BoardModel | undefined }) => {
   const [money, setMoney] = useState(3);
   const [cardsPlayed, setCardsPlayed] = useState();
   const [cardsInHand, setCardsInHand] = useState<CardModel[]>([]);
@@ -74,8 +70,13 @@ const Board = () => {
           height: 200,
           backgroundColor: "gray",
           borderRadius: 10,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
-      ></div>
+      >
+        <p>{props.model?.name}</p>
+      </div>
       <div className="tucked-cards"></div>
     </div>
   );

@@ -1,3 +1,6 @@
+import { BoardModel } from "./models/BoardModel";
+import { CardModel } from "./models/CardModel";
+
 type BasicResource = "WOOD" | "ORE" | "STEEL" | "BRICK";
 type FancyResource = "GLASS" | "RUG" | "PAPER";
 
@@ -54,3 +57,23 @@ export type PyramidStage = {
   cost: Resource[];
   gain: CardGain;
 }
+
+export type PlayerState = {
+  socketID: string;
+  name: string | undefined;
+  isReady: boolean;
+  board: BoardModel | undefined;
+  cardsInHand: CardModel[];
+  militaryWins: number[];
+  militaryLosses: number[];
+  playerOnLeft: string;
+  playerOnRight: string;
+};
+
+export type GameState = {
+  gameID: string,
+  hasStarted: boolean,
+  players: {[key:string] : PlayerState},
+  currentAge: number,
+  cardDirectionClockwise: boolean
+};

@@ -4,8 +4,9 @@ import http from 'http';
 import crypto from "crypto";
 import path from 'path';
 import bodyParser from 'body-parser';
-import { createGameState, createPlayerState, GameState, initializeGame, PlayerState } from './api';
+import { createGameState, createPlayerState, initializeGame } from './api';
 import { Socket } from 'socket.io';
+import { GameState, PlayerState } from '../../src/types';
 
 const app = express()
 
@@ -57,8 +58,8 @@ const delay = (ms: number) => {
     });
 };
 
-const games: Map<string, GameState> = new Map<string, GameState>();
-const socketToGameMap: Map<string, string> = new Map<string, string>();
+const games: {[key:string]: GameState} = {};
+const socketToGameMap: {[key:string]: string} = {};
 
 // IO handler for new socket connection
 io.on('connection', (socket : Socket) => {
@@ -69,9 +70,9 @@ io.on('connection', (socket : Socket) => {
         const gameID = crypto.randomBytes(3).toString('hex');
         const gameState = createGameState(gameID);
 
-        gameState.players.set(socket.id, createPlayerState(socket.id));
-        socketToGameMap.set(socket.id, gameID);
-        games.set(gameID, gameState);
+        gameState.players[socket.id] = createPlayerState(socket.id);
+        socketToGameMap[socket.id] = gameID;
+        games[gameID] = gameState;
         socket.join(gameID);
         
         socket.emit("createRoomResponse", { gameID: gameID, success: true });
@@ -80,15 +81,15 @@ io.on('connection', (socket : Socket) => {
     // Event handler for joining a game room
     socket.on("joinGameRoom", (data: {gameID: string}) => {
         const gameID = data.gameID;
-        const gameState = games.get(gameID);
+        const gameState = games[gameID];
 
         if (!gameID || !gameState) {
             socket.emit("joinRoomResponse", { error: `Error: Unable to join game ${gameID}.` });
             return;
         }
 
-        gameState.players.set(socket.id, createPlayerState(socket.id));
-        socketToGameMap.set(socket.id, gameID);
+        gameState.players[socket.id] = createPlayerState(socket.id);
+        socketToGameMap[socket.id] = gameID;
 
         if (!socket.rooms.has(gameID)) {
             socket.join(gameID);
@@ -99,9 +100,9 @@ io.on('connection', (socket : Socket) => {
 
     // Event handler for when a player has joined a room and is ready
     socket.on("onPlayerReady", async (data: {name: string}) => {
-        const gameID = socketToGameMap.get(socket.id);
-        const gameState = games.get(gameID ?? '');
-        const playerState = games.get(gameID ?? '')?.players.get(socket.id);
+        const gameID = socketToGameMap[socket.id];
+        const gameState = games[gameID];
+        const playerState = games[gameID].players[socket.id];
 
         if (!gameID || !gameState || !playerState) {
             console.error(`Error: Unable to join game ${gameID}.`);
@@ -111,21 +112,21 @@ io.on('connection', (socket : Socket) => {
         playerState.name = data.name;
         playerState.isReady = true;
 
-        const readyPlayers = [...gameState.players.values()].filter((playerState: PlayerState) => playerState.isReady).map((player: PlayerState) => player.name);
+        const readyPlayers = Object.values(gameState.players).filter((playerState: PlayerState) => playerState.isReady).map((player: PlayerState) => player.name);
         io.to(gameID).emit("playerReadyResponse", { numReadyPlayers: readyPlayers.length, readyPlayers: readyPlayers, success: true });
     });
 
     // Event handler for when a game creator player starts the game
     socket.on("onGameStart", async (data: {name: string}) => {
-        const gameID = socketToGameMap.get(socket.id);
-        const gameState = games.get(gameID ?? '');
+        const gameID = socketToGameMap[socket.id];
+        const gameState = games[gameID];
 
         if (!gameID || !gameState) {
             console.error("Error: Error starting game.");
             return;
         }
 
-        const numReadyPlayers: number = [...gameState.players.values()].filter((playerState: PlayerState) => playerState.isReady).length;
+        const numReadyPlayers: number = Object.values(gameState.players).filter((playerState: PlayerState) => playerState.isReady).length;
 
         if (numReadyPlayers < 0 || numReadyPlayers > 7) {
             socket.emit("startGameSession", { error: `Error: Too few or too many players.` });
@@ -142,11 +143,11 @@ io.on('connection', (socket : Socket) => {
     // Event handler for getting the game state
     socket.on("getGameState", (data : {gameID: string}) => {
         const gameID = data.gameID;
-        const gameState = games.get(gameID);
+        const gameState = games[gameID];
 
         if (!gameID || !gameState) {
-        console.error(`Error: Unable to retrieve game state for ${gameID}.`);
-        return;
+            console.error(`Error: Unable to retrieve game state for ${gameID}.`);
+            return;
         }
 
         socket.emit("getGameStateResponse", { gameState: gameState, success: true });
@@ -154,9 +155,9 @@ io.on('connection', (socket : Socket) => {
 
     // Event handler for when a game has reached an end state
     socket.on("gameEnd", ({}) => {
-        const gameID = socketToGameMap.get(socket.id);
-        const gameState = games.get(gameID ?? '');
-        const playerState = games.get(gameID ?? '')?.players.get(socket.id);
+        const gameID = socketToGameMap[socket.id];
+        const gameState = games[gameID];
+        const playerState = games[gameID].players[socket.id];
 
         if (playerState) {
             playerState.isReady = false;
@@ -168,14 +169,14 @@ io.on('connection', (socket : Socket) => {
 
     // Event handler for when a socket disconnects
     socket.on('disconnect', () => {
-    const gameID = socketToGameMap.get(socket.id);
-    const gameState = games.get(gameID ?? '');
+    const gameID = socketToGameMap[socket.id];
+    const gameState = games[gameID];
     if (gameID && gameState) {
-        games.get(gameID)?.players.delete(socket.id)
+        delete games[gameID].players[socket.id]
         if (Object.keys(gameState.players).length == 0) {
-            games.delete(gameID)
+            delete games[gameID]
         }
-        socketToGameMap.delete(socket.id);
+        delete socketToGameMap[socket.id];
     }
     console.log(`Socket ${socket.id} disconnected.`);
     });

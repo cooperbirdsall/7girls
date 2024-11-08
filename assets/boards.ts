@@ -2,6 +2,7 @@ import { BoardModel } from "../src/models/BoardModel";
 
 export const boards: Array<BoardModel> = [
     {
+        id: 1,
         name: "Gizah",
         startingResource: "STEEL",
         pyramidStages: [
@@ -13,6 +14,7 @@ export const boards: Array<BoardModel> = [
         militaryPoints: 0,
     },
     {
+        id: 2,
         name: "Alexandria",
         startingResource: "GLASS",
         pyramidStages: [
@@ -24,6 +26,7 @@ export const boards: Array<BoardModel> = [
         militaryPoints: 0,
     },
     {
+        id: 3,
         name: "Babylon",
         startingResource: "WOOD",
         pyramidStages: [
@@ -35,6 +38,7 @@ export const boards: Array<BoardModel> = [
         militaryPoints: 0,
     },
     {
+        id: 4,
         name: "Rhódos",
         startingResource: "ORE",
         pyramidStages: [
@@ -46,6 +50,7 @@ export const boards: Array<BoardModel> = [
         militaryPoints: 0,
     },
     {
+        id: 5,
         name: "Éphesos",
         startingResource: "PAPER",
         pyramidStages: [
@@ -57,6 +62,7 @@ export const boards: Array<BoardModel> = [
         militaryPoints: 0,
     },
     {
+        id: 6,
         name: "Olympía",
         startingResource: "BRICK",
         pyramidStages: [
@@ -68,6 +74,7 @@ export const boards: Array<BoardModel> = [
         militaryPoints: 0
     },
     {
+        id: 7,
         name: "Halikarnassos",
         startingResource: "RUG",
         pyramidStages: [

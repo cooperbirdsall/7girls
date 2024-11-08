@@ -1,36 +1,18 @@
 import { BoardModel } from "../../src/models/BoardModel";
 import { age1cards } from "../../assets/cards/age1cards";
+import { boards } from "../../assets/boards";
 import { CardModel } from "../../src/models/CardModel";
-
-export type GameState = {
-    gameID: string,
-    hasStarted: boolean,
-    players: Map<string, PlayerState>,
-    currentAge: number,
-    cardDirectionClockwise: boolean
-};
+import { GameState, PlayerState } from "../../src/types";
 
 export const createGameState = (gameID: string) : GameState => {
     return {
         gameID,
         hasStarted: false,
-        players: new Map<string, PlayerState>(),
+        players: {},
         currentAge: 1,
         cardDirectionClockwise: true,
     }
 }
-
-export type PlayerState = {
-    socketID: string;
-    name: string | undefined;
-    isReady: boolean;
-    board: BoardModel | undefined;
-    cardsInHand: CardModel[];
-    militaryWins: number[];
-    militaryLosses: number[];
-    playerOnLeft: string;
-    playerOnRight: string;
-};
 
 export const createPlayerState = (socketID: string) : PlayerState => {
     return {
@@ -47,12 +29,18 @@ export const createPlayerState = (socketID: string) : PlayerState => {
 }
 
 export const initializeGame = async (gameState: GameState) => {
+    setRightAndLeftPlayers(gameState);
+    setPlayerBoards(gameState);
+    startAge(gameState);
+}
+
+const setRightAndLeftPlayers = async (gameState: GameState) => {
     let map : string[] = [];
-    for (const [playerID, _] of gameState.players) {
+    for (const playerID of Object.keys(gameState.players)) {
         map.push(playerID); 
     }
     for (let i = 0; i < map.length; i++) {
-        const player = gameState.players.get(map[i]);
+        const player = gameState.players[map[i]];
         if (player) {
             if (i === 0) {
                 player.playerOnLeft = map[map.length - 1];
@@ -66,11 +54,9 @@ export const initializeGame = async (gameState: GameState) => {
             }
         }
     }
-
-    startAge(gameState);
 }
 
-export const startAge = async (gameState: GameState) => {
+const startAge = async (gameState: GameState) => {
     dealHands(gameState);
 }
 
@@ -80,10 +66,10 @@ export const startAge = async (gameState: GameState) => {
  * 
  * gameState: the current state of the game
  */
-export const endAge = async (gameState: GameState) => {
-    for (const [_, player] of gameState.players) {
-        let playerVersusPlayerLeft = player.board?.militaryPoints ?? 0 - (gameState.players.get(player.playerOnLeft)?.board?.militaryPoints ?? 0);
-        let playerVersusPlayerRight = player.board?.militaryPoints ?? 0 - (gameState.players.get(player.playerOnRight)?.board?.militaryPoints ?? 0);
+const endAge = async (gameState: GameState) => {
+    for (const player of Object.values(gameState.players)) {
+        let playerVersusPlayerLeft = player.board?.militaryPoints ?? 0 - (gameState.players[player.playerOnLeft].board?.militaryPoints ?? 0);
+        let playerVersusPlayerRight = player.board?.militaryPoints ?? 0 - (gameState.players[player.playerOnRight].board?.militaryPoints ?? 0);
         
         let playerWins = 0;
         let playerLosses = 0;
@@ -127,7 +113,7 @@ export const endAge = async (gameState: GameState) => {
     gameState.cardDirectionClockwise = !gameState.cardDirectionClockwise;
 }
 
-export const dealHands = async (gameState: GameState) => {
+const dealHands = async (gameState: GameState) => {
     let cards;
     switch (gameState.currentAge) {
         case 1:
@@ -137,12 +123,12 @@ export const dealHands = async (gameState: GameState) => {
     }
 
     let dealtCards = new Set<number>();
-    for (const [_, player] of gameState.players) {
+    for (const player of Object.values(gameState.players)) {
         for (let i = 0; i < 7; i++) {
             let nextCard;
             do {
                 nextCard = Math.floor(Math.random() * cards.length);
-            } while (nextCard in dealtCards);
+            } while (dealtCards.has(nextCard));
 
             player.cardsInHand.push(cards[nextCard]);
             dealtCards.add(nextCard);
@@ -150,17 +136,29 @@ export const dealHands = async (gameState: GameState) => {
     }
 }
 
-export const passCards = async (gameState: GameState) => {
+const passCards = async (gameState: GameState) => {
     let newCards = new Map<string, CardModel[]>;
-    for (const [playerID, player] of gameState.players) {
+    for (const [playerID, player] of Object.entries(gameState.players)) {
         if (gameState.cardDirectionClockwise) {
-            newCards.set(playerID, gameState.players.get(player.playerOnRight)?.cardsInHand ?? []);
+            newCards.set(playerID, gameState.players[player.playerOnRight].cardsInHand ?? []);
         } else {
-            newCards.set(playerID, gameState.players.get(player.playerOnLeft)?.cardsInHand ?? []);
+            newCards.set(playerID, gameState.players[player.playerOnLeft].cardsInHand ?? []);
         }
     }
 
-    for (const [playerID, player] of gameState.players) {
+    for (const [playerID, player] of Object.entries(gameState.players)) {
         player.cardsInHand = newCards.get(playerID) ?? [];
+    }
+}
+
+const setPlayerBoards = async (gameState: GameState) => {
+    let dealtBoards = new Set<number>();
+    for (const player of Object.values(gameState.players)) {
+        let nextBoard;
+        do {
+            nextBoard = Math.floor(Math.random() * boards.length);
+        } while (nextBoard in dealtBoards);
+
+        player.board = boards[nextBoard];
     }
 }

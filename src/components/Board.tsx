@@ -71,11 +71,13 @@ const Board = (props: { model: BoardModel | undefined }) => {
           backgroundColor: "gray",
           borderRadius: 10,
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
         <p>{props.model?.name}</p>
+        <p>starting resource: {props.model?.startingResource}</p>
       </div>
       <div className="tucked-cards"></div>
     </div>

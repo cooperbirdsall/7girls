@@ -68,6 +68,7 @@ export type PlayerState = {
   militaryLosses: number[];
   playerOnLeft: string;
   playerOnRight: string;
+  waitingToPlayCard: boolean;
 };
 
 export type GameState = {

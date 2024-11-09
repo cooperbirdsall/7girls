@@ -4,9 +4,10 @@ import http from 'http';
 import crypto from "crypto";
 import path from 'path';
 import bodyParser from 'body-parser';
-import { createGameState, createPlayerState, initializeGame } from './api';
+import { createGameState, createPlayerState, handleCardPlayed, initializeGame } from './api';
 import { Socket } from 'socket.io';
 import { GameState, PlayerState } from '../../src/types';
+import { CardModel } from '../../src/models/CardModel';
 
 const app = express()
 
@@ -59,6 +60,7 @@ const delay = (ms: number) => {
 };
 
 const games: {[key:string]: GameState} = {};
+const nextGameStates: {[key:string]: GameState} = {};
 const socketToGameMap: {[key:string]: string} = {};
 
 // IO handler for new socket connection
@@ -151,6 +153,31 @@ io.on('connection', (socket : Socket) => {
         }
 
         socket.emit("getGameStateResponse", { gameState: gameState, success: true });
+    });
+
+    // Event handler for when a player picks a card
+    socket.on("playCard", (data : {card: CardModel, moneyCost: number}) => {
+        const gameID = socketToGameMap[socket.id];
+        const gameState = games[gameID];
+
+        if (!gameID || !gameState) {
+            console.error(`Error: Unable to retrieve game state for ${gameID}.`);
+            return;
+        }
+
+        let nextGameState = nextGameStates[gameID];
+        if (!nextGameState) {
+            nextGameState = gameState;
+        }
+
+        const turnEnded = handleCardPlayed(gameState, nextGameState, socket.id, data);
+
+        if (!turnEnded) {
+            socket.emit("waitingForAllPlayersToFinishTurn", {success: true});
+        } else {
+            delete nextGameStates[gameID];
+            io.to(gameID).emit("finishTurn", { gameState: games[gameID], success: true });
+        }
     });
 
     // Event handler for when a game has reached an end state

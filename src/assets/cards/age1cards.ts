@@ -1,4 +1,4 @@
-import { CardModel } from "../../src/models/CardModel";
+import { CardModel } from "../../models/CardModel";
 
 export const age1cards: Array<CardModel> = [
     {

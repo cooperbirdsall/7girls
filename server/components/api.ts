@@ -1,6 +1,6 @@
 import { BoardModel } from "../../src/models/BoardModel";
-import { age1cards } from "../../assets/cards/age1cards";
-import { boards } from "../../assets/boards";
+import { age1cards } from "../../src/assets/cards/age1cards";
+import { boards } from "../../src/assets/boards";
 import { CardModel } from "../../src/models/CardModel";
 import { GameState, PlayerState } from "../../src/types";
 
@@ -24,7 +24,8 @@ export const createPlayerState = (socketID: string) : PlayerState => {
         militaryWins: [],
         militaryLosses: [],
         playerOnLeft: "",
-        playerOnRight: ""
+        playerOnRight: "",
+        waitingToPlayCard: false,
     }
 }
 
@@ -58,6 +59,39 @@ const setRightAndLeftPlayers = async (gameState: GameState) => {
 
 const startAge = async (gameState: GameState) => {
     dealHands(gameState);
+    startTurn(gameState);
+}
+
+const startTurn = async (gameState: GameState) => {
+    for (let player of Object.values(gameState.players)) {
+        player.waitingToPlayCard = true;
+    }
+}
+
+export const handleCardPlayed = async (gameState: GameState, nextGameState: GameState, playerID: string, cardData: {card: CardModel, moneyCost: number}) => {
+    let playerBoard = nextGameState.players[playerID].board;
+    if (playerBoard) {
+        playerBoard.money -= cardData.moneyCost;
+        playerBoard.cardsPlayed.push(cardData.card);
+        nextGameState.players[playerID].cardsInHand = nextGameState.players[playerID].cardsInHand.filter((card) => card.id !== cardData.card.id);
+        console.log(nextGameState.players[playerID].cardsInHand)
+    }
+
+    gameState.players[playerID].waitingToPlayCard = false;
+
+    const numWaitingPlayers: number = Object.values(gameState.players).filter((playerState: PlayerState) => playerState.waitingToPlayCard).length;
+
+    if (numWaitingPlayers > 0) {
+        return false;
+    } else {
+        endTurn(gameState, nextGameState)
+        return true;
+    }
+}
+
+export const endTurn = async (gameState: GameState, nextGameState: GameState) => {
+    gameState = nextGameState;
+    // passCards(gameState);
 }
 
 /**

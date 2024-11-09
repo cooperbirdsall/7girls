@@ -1,4 +1,4 @@
-import { BoardModel } from "../src/models/BoardModel";
+import { BoardModel } from "../models/BoardModel";
 
 export const boards: Array<BoardModel> = [
     {
@@ -12,6 +12,7 @@ export const boards: Array<BoardModel> = [
         ],
         cardsPlayed: [],
         militaryPoints: 0,
+        money: 3,
     },
     {
         id: 2,
@@ -24,6 +25,7 @@ export const boards: Array<BoardModel> = [
         ],
         cardsPlayed: [],
         militaryPoints: 0,
+        money: 3,
     },
     {
         id: 3,
@@ -36,6 +38,7 @@ export const boards: Array<BoardModel> = [
         ],
         cardsPlayed: [],
         militaryPoints: 0,
+        money: 3,
     },
     {
         id: 4,
@@ -48,6 +51,7 @@ export const boards: Array<BoardModel> = [
         ],
         cardsPlayed: [],
         militaryPoints: 0,
+        money: 3,
     },
     {
         id: 5,
@@ -60,6 +64,7 @@ export const boards: Array<BoardModel> = [
         ],
         cardsPlayed: [],
         militaryPoints: 0,
+        money: 3,
     },
     {
         id: 6,
@@ -71,7 +76,8 @@ export const boards: Array<BoardModel> = [
             {cost: ["BRICK", "BRICK", "BRICK"], gain: { points: 7}},
         ],
         cardsPlayed: [],
-        militaryPoints: 0
+        militaryPoints: 0,
+        money: 3,
     },
     {
         id: 7,
@@ -83,6 +89,7 @@ export const boards: Array<BoardModel> = [
             {cost: ["STEEL", "STEEL", "STEEL"], gain: { points: 7}},
         ],
         cardsPlayed: [],
-        militaryPoints: 0
+        militaryPoints: 0,
+        money: 3,
     },
 ];

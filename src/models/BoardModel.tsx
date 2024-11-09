@@ -8,5 +8,5 @@ export type BoardModel = {
   pyramidStages: PyramidStage[];
   cardsPlayed: CardModel[];
   militaryPoints: number;
-  money?: number;
+  money: number;
 };

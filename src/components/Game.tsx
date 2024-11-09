@@ -2,14 +2,15 @@ import React, { useEffect, useState } from "react";
 import Board from "./Board";
 import socket from "../socket";
 import { useParams } from "react-router-dom";
-import { GameState, PlayerState } from "../types";
+import { GameState, PlayerState, Resource } from "../types";
 import { CardModel } from "../models/CardModel";
+import Card from "./Card";
 
 const Game = () => {
   const { roomID } = useParams();
 
   const [age, setAge] = useState(1);
-  const [playerState, setPlayerState] = useState<PlayerState | null>(null);
+  const [playerState, setPlayerState] = useState<PlayerState>();
 
   useEffect(() => {
     socket.emit("getGameState", { gameID: roomID });
@@ -30,38 +31,69 @@ const Game = () => {
         }
       }
     );
-    // distribute boards (which give everyone 3 coins)
-    // shuffle cards for age 1
-    // deal 7 age 1 cards to each player
-    // call method for wait for players to pick card
+
+    socket.on("waitingForAllPlayersToFinishTurn", () => {
+      console.log("waiting for other players.");
+    });
+
+    socket.on(
+      "finishTurn",
+      (response: {
+        gameState: GameState;
+        success?: boolean;
+        error?: string;
+      }) => {
+        console.log(response.gameState);
+        const playerState = response.gameState.players[socket.id];
+        setPlayerState(playerState);
+      }
+    );
+
     return () => {
       socket.off("getGameStateResponse");
+      socket.off("waitingForAllPlayersToFinishTurn");
+      socket.off("finishTurn");
     };
   }, [roomID]);
 
   const playCard = (card: CardModel) => {
-    if (card.cost.symbol) {
-      for (let cardPlayed of playerState?.board?.cardsPlayed ?? []) {
-        if (cardPlayed.gain.symbol) {
-          for (let symbol of cardPlayed.gain.symbol) {
-            if (card.cost.symbol === symbol) {
-              // can afford card ! (no spending)
-              console.log("can afford!");
+    if (playerState && playerState.board) {
+      if (card.cost.symbol) {
+        for (let cardPlayed of playerState.board.cardsPlayed ?? []) {
+          if (cardPlayed.gain.symbol) {
+            for (let symbol of cardPlayed.gain.symbol) {
+              if (card.cost.symbol === symbol) {
+                // can afford card ! (no spending)
+                console.log("can afford!");
+                socket.emit("playCard", { card: card, moneyCost: 0 });
+                return;
+              }
             }
           }
         }
       }
-    } else if (
-      (!card.cost.resource || card.cost.resource.length === 0) &&
-      !card.cost.money
-    ) {
-      // can afford card too ! (no spending)
-      console.log("can afford!");
-      socket.emit("playCard", { cardId: card.id, moneyCost: 0 });
-    } else {
+
+      if (
+        (!card.cost.resource || card.cost.resource.length === 0) &&
+        !card.cost.money
+      ) {
+        // can afford card too ! (no spending)
+        console.log("can afford!");
+        socket.emit("playCard", { card: card, moneyCost: 0 });
+        return;
+      }
+
       if (card.cost.money) {
-        if (card.cost.money <= (playerState?.board?.money ?? 0)) {
+        if (card.cost.money <= playerState.board.money) {
           // can afford money cost ! (spend money)
+          if (!card.cost.resource) {
+            console.log("can afford!");
+            socket.emit("playCard", {
+              card: card,
+              moneyCost: card.cost.money,
+            });
+            return;
+          }
         }
       }
       if (card.cost.resource) {
@@ -72,28 +104,7 @@ const Game = () => {
   };
 
   const cardsInHand = playerState?.cardsInHand.map((card) => {
-    return (
-      <button
-        style={{
-          width: "10%",
-          height: "80%",
-          backgroundColor: `${card.color}`,
-        }}
-        onClick={() => playCard(card)}
-      >
-        {card.name}
-        <br />
-        <br /> cost: {card.cost.money ? card.cost.money + " coins" : ""}
-        {card.cost.resource
-          ? card.cost.resource
-              .map((resource) => {
-                return resource;
-              })
-              .join(" ")
-          : ""}
-        {card.cost.symbol ? card.cost.symbol : ""}
-      </button>
-    );
+    return <Card model={card} playCard={playCard} key={card.id} />;
   });
 
   return (
@@ -119,7 +130,7 @@ const Game = () => {
       >
         {cardsInHand}
       </div>
-      <Board model={playerState?.board}></Board>
+      {playerState?.board && <Board model={playerState?.board}></Board>}
     </div>
   );
 };

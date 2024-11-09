@@ -1,5 +1,5 @@
 import { CardModel } from "../models/CardModel";
-import { CardGain } from "../types";
+import { CardCost, CardGain } from "../types";
 import { resources } from "../utils/resources";
 
 type CardProps = {
@@ -22,20 +22,20 @@ const Card = ({ playCard, model }: CardProps) => {
     } else if (gain.resource) {
       //if it's a OneOfResource
       if (Array.isArray(gain.resource[0])) {
-        return (
-          gain.resource[0]
+        return gain.resource[0]
+          .map((res) => (
             //@ts-ignore
-            .map((res) => <img src={resources[res]} alt={res} />)
-            .reduce((prev, curr) => (
-              <>
-                {prev} / {curr}
-              </>
-            ))
-        );
+            <img className="gain-icon" src={resources[res]} alt={res} />
+          ))
+          .reduce((prev, curr) => (
+            <>
+              {prev} <p className="one-of-slash">/</p> {curr}
+            </>
+          ));
       } else {
         return gain.resource.map((res) => (
           //@ts-ignore
-          <img src={resources[res]} alt={res} />
+          <img className="gain-icon" src={resources[res]} alt={res} />
         ));
       }
     } else if (gain.science) {
@@ -43,6 +43,25 @@ const Card = ({ playCard, model }: CardProps) => {
     } else {
       return <div>gain not supported</div>;
     }
+  };
+
+  const cost = (cost: CardCost) => {
+    const images = [];
+    if (cost.money) {
+    }
+    if (cost.resource) {
+      for (let i = 0; i < cost.resource.length; i++) {
+        images.push(
+          <img
+            className="cost-icon"
+            //@ts-ignore
+            src={resources[cost.resource[i]]}
+            alt="cost"
+          />
+        );
+      }
+    }
+    return images;
   };
 
   return (
@@ -64,6 +83,16 @@ const Card = ({ playCard, model }: CardProps) => {
         }}
       >
         {gain(model.gain)}
+      </div>
+      <div
+        style={{
+          marginTop: 5,
+          marginLeft: 5,
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {cost(model.cost)}
       </div>
       <div>
         <p>{model.name}</p>

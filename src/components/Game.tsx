@@ -4,6 +4,7 @@ import socket from "../socket";
 import { useParams } from "react-router-dom";
 import { GameState, PlayerState, Resource } from "../types";
 import { CardModel } from "../models/CardModel";
+import { hasEnoughResources, getMissingResources } from "../models/BoardModel";
 import Card from "./Card";
 
 const Game = () => {
@@ -57,49 +58,60 @@ const Game = () => {
   }, [roomID]);
 
   const playCard = (card: CardModel) => {
-    if (playerState && playerState.board) {
-      if (card.cost.symbol) {
-        for (let cardPlayed of playerState.board.cardsPlayed ?? []) {
-          if (cardPlayed.gain.symbol) {
-            for (let symbol of cardPlayed.gain.symbol) {
-              if (card.cost.symbol === symbol) {
-                // can afford card ! (no spending)
-                console.log("can afford!");
-                socket.emit("playCard", { card: card, moneyCost: 0 });
-                return;
-              }
+    if (!playerState || !playerState.board) return;
+
+    if (card.cost.symbol) {
+      for (let cardPlayed of playerState.board.cardsPlayed ?? []) {
+        if (cardPlayed.gain.symbol) {
+          for (let symbol of cardPlayed.gain.symbol) {
+            if (card.cost.symbol === symbol) {
+              // can afford card ! (no spending)
+              console.log("can afford (free from symbol)!");
+              socket.emit("playCard", { card: card, moneyCost: 0 });
+              return;
             }
           }
         }
       }
+    }
 
-      if (
-        (!card.cost.resource || card.cost.resource.length === 0) &&
-        !card.cost.money
-      ) {
-        // can afford card too ! (no spending)
-        console.log("can afford!");
-        socket.emit("playCard", { card: card, moneyCost: 0 });
-        return;
-      }
+    if (
+      (!card.cost.resource || card.cost.resource.length === 0) &&
+      !card.cost.money
+    ) {
+      // can afford card too ! (no spending)
+      console.log("can afford (card does nont cost anything)!");
+      socket.emit("playCard", { card: card, moneyCost: 0 });
+      return;
+    }
 
-      if (card.cost.money) {
-        if (card.cost.money <= playerState.board.money) {
-          // can afford money cost ! (spend money)
-          if (!card.cost.resource) {
-            console.log("can afford!");
-            socket.emit("playCard", {
-              card: card,
-              moneyCost: card.cost.money,
-            });
-            return;
-          }
+    if (card.cost.money) {
+      if (card.cost.money <= playerState.board.money) {
+        // can afford money cost ! (spend money)
+        if (!card.cost.resource) {
+          console.log("can afford (spend money to buy)!");
+          socket.emit("playCard", {
+            card: card,
+            moneyCost: card.cost.money,
+          });
+          return;
         }
       }
-      if (card.cost.resource) {
-        // idk dude
-        console.log("not doing that rn");
+    }
+    if (card.cost.resource) {
+      if(hasEnoughResources(playerState.board, card.cost.resource)) {
+        console.log("can afford (have enough resources!)");
+        return;
       }
+      let missingResources = getMissingResources(playerState.board, card.cost.resource);
+      console.log('missing resources: %v', missingResources);
+
+      // TODO: i'm too lazy to wire in the playerstates and finish this
+      // now we have to pass the left & right players to 
+      // something like getSellableResources(left)
+      // getSellableResources(right)
+
+      console.log("not doing that rn");
     }
   };
 

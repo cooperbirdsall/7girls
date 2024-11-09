@@ -200,7 +200,7 @@ io.on('connection', (socket : Socket) => {
     const gameState = games[gameID];
     if (gameID && gameState) {
         delete games[gameID].players[socket.id]
-        if (Object.keys(gameState.players).length == 0) {
+        if (Object.keys(gameState.players).length === 0) {
             delete games[gameID]
         }
         delete socketToGameMap[socket.id];

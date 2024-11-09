@@ -1,5 +1,5 @@
 import { CardModel } from "../models/CardModel";
-import { CardGain, Resource, Symbol } from "../types";
+import { CardGain } from "../types";
 import { resources } from "../utils/resources";
 
 type CardProps = {
@@ -12,7 +12,7 @@ const Card = ({ playCard, model }: CardProps) => {
     if (gain.military) {
       const images = [];
       for (let i = 0; i < gain.military; i++) {
-        images.push(<img src={resources["MILITARY"]} />);
+        images.push(<img src={resources["MILITARY"]} alt="Military" />);
       }
       return images;
     } else if (gain.money) {
@@ -20,11 +20,12 @@ const Card = ({ playCard, model }: CardProps) => {
     } else if (gain.points) {
       return <div></div>;
     } else if (gain.resource) {
+      //if it's a OneOfResource
       if (Array.isArray(gain.resource[0])) {
         return (
           gain.resource[0]
             //@ts-ignore
-            .map((res) => <img src={resources[res]} />)
+            .map((res) => <img src={resources[res]} alt={res} />)
             .reduce((prev, curr) => (
               <>
                 {prev} / {curr}
@@ -32,8 +33,10 @@ const Card = ({ playCard, model }: CardProps) => {
             ))
         );
       } else {
-        //@ts-ignore
-        return gain.resource.map((res) => <img src={resources[res]} />);
+        return gain.resource.map((res) => (
+          //@ts-ignore
+          <img src={resources[res]} alt={res} />
+        ));
       }
     } else if (gain.science) {
       return <div></div>;
@@ -53,16 +56,18 @@ const Card = ({ playCard, model }: CardProps) => {
         style={{
           backgroundColor: model.color,
           width: "100%",
-          height: 100,
+          height: 50,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          borderRadius: "9px 9px 0 0",
+          borderRadius: "7.9px 7.9px 0 0",
         }}
       >
         {gain(model.gain)}
       </div>
-      <p>{model.name}</p>
+      <div>
+        <p>{model.name}</p>
+      </div>
     </div>
   );
 };

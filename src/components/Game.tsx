@@ -121,9 +121,10 @@ const Game = () => {
       <div
         style={{
           height: "25%",
-          width: "80%",
+          width: "97%",
           display: "flex",
           flexDirection: "row",
+          gap: 20,
           justifyContent: "space-between",
           alignItems: "center",
         }}

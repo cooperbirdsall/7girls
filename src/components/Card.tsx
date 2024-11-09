@@ -94,8 +94,15 @@ const Card = ({ playCard, model }: CardProps) => {
       >
         {cost(model.cost)}
       </div>
-      <div>
-        <p>{model.name}</p>
+      <div
+        style={{
+          position: "absolute",
+          width: "100%",
+          bottom: 5,
+          textAlign: "center",
+        }}
+      >
+        {model.name}
       </div>
     </div>
   );

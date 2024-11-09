@@ -37,7 +37,8 @@
   border-radius: 11px;
   transition: ease-in 0.2s;
   border: 3px solid black;
-  z-index: 3
+  z-index: 3;
+  position: relative;
 }
 
 .card:hover {

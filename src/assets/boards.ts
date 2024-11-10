@@ -72,7 +72,7 @@ export const boards: Array<BoardModel> = [
         startingResource: "BRICK",
         pyramidStages: [
             {cost: ["STEEL", "STEEL"], gain: { points: 3 }},
-            {cost: ["WOOD", "WOOD"], gain: { func: () => {} }},
+            {cost: ["WOOD", "WOOD"], gain: { }},
             {cost: ["BRICK", "BRICK", "BRICK"], gain: { points: 7}},
         ],
         cardsPlayed: [],
@@ -85,7 +85,7 @@ export const boards: Array<BoardModel> = [
         startingResource: "RUG",
         pyramidStages: [
             {cost: ["ORE", "ORE"], gain: { points: 3 }},
-            {cost: ["GLASS", "PAPER"], gain: { func: () => {} }},
+            {cost: ["GLASS", "PAPER"], gain: { }},
             {cost: ["STEEL", "STEEL", "STEEL"], gain: { points: 7}},
         ],
         cardsPlayed: [],

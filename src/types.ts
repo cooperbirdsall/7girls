@@ -22,10 +22,18 @@ export type CardGain = {
   military?: number;
   resource?: Resource[];
   science?: Science;
-  func?: Function;
+  nowAction?: CardAction;
+  endAction?: CardAction;
   points?: number;
   symbol?: Symbol[];
 };
+
+export type CardAction = {
+  forColor: string
+  fromNeighbors: boolean;
+  fromYou: boolean;
+  fromWonders: boolean;
+}
 
 export type Symbol = 
   "HAMMER" |

@@ -8,9 +8,8 @@ export const age2cards: Array<CardModel> = [
         color: "orange",
         gain: {
             money: 1,
-            action: {
+            nowAction: {
                 forColor: "brown", 
-                immediate: true,
                 fromNeighbors: true,
                 fromYou: true,
                 fromWonders: false
@@ -25,9 +24,8 @@ export const age2cards: Array<CardModel> = [
         color: "orange",
         gain: {
             money: 1,
-            action: { 
+            nowAction: { 
                 forColor: "brown", 
-                immediate: true,
                 fromNeighbors: true,
                 fromYou: true,
                 fromWonders: false
@@ -42,9 +40,8 @@ export const age2cards: Array<CardModel> = [
         color: "orange",
         gain: {
             money: 2,
-            action: { 
+            nowAction: { 
                 forColor: "silver", 
-                immediate: true,
                 fromNeighbors: true,
                 fromYou: true,
                 fromWonders: false

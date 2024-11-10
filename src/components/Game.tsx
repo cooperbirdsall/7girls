@@ -6,11 +6,13 @@ import { GameState, PlayerState, Resource, Money, CardCost } from "../types";
 import { CardModel } from "../models/CardModel";
 import { getMissingResources } from "../models/BoardModel";
 import Card from "./Card";
+import SideBoard from "./SideBoard";
 
 const Game = () => {
   const { roomID } = useParams();
 
   const [age, setAge] = useState(1);
+  const [gameState, setGameState] = useState<GameState>();
   const [playerState, setPlayerState] = useState<PlayerState>();
 
   useEffect(() => {
@@ -29,6 +31,7 @@ const Game = () => {
           console.log(response.gameState);
           const playerState = response.gameState.players[socket.id];
           setPlayerState(playerState);
+          setGameState(response.gameState);
         }
       }
     );
@@ -66,7 +69,7 @@ const Game = () => {
     let payment: CardCost = {
       resource: [],
       money: 10,
-    }
+    };
 
     // is card free
     if (
@@ -95,7 +98,6 @@ const Game = () => {
       }
     }
 
-
     // do we have enough money to pay for this?
     if (card.cost.money) {
       if (card.cost.money <= playerState.board.money) {
@@ -111,21 +113,28 @@ const Game = () => {
 
     // do we have enough resources to pay for this?
     if (payment.resource) {
+      let missing = getMissingResources(
+        playerState.board,
+        payment.resource,
         // @ts-ignore
-        let missing = getMissingResources(playerState.board, payment.resource, card.cost.resource)
-        if (missing.length === 0) {
-          console.log("i have enough resources to pay for this %v", payment.resource)
-          socket.emit("playCard", {
-            card: card,
-            moneyCost: payment.money,
-          });
-        } else {
-          console.log("cannot afford, missing resources: %v", missing)
-        }
+        card.cost.resource
+      );
+      if (missing.length === 0) {
+        console.log(
+          "i have enough resources to pay for this %v",
+          payment.resource
+        );
+        socket.emit("playCard", {
+          card: card,
+          moneyCost: payment.money,
+        });
+      } else {
+        console.log("cannot afford, missing resources: %v", missing);
+      }
     }
 
-    console.log("sorry girl, you're broke!")
-  }
+    console.log("sorry girl, you're broke!");
+  };
 
   const cardsInHand = playerState?.cardsInHand.map((card) => {
     return <Card model={card} playCard={playCard} key={card.id} />;
@@ -138,23 +147,31 @@ const Game = () => {
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        justifyContent: "center",
+        justifyContent: "flex-start",
         alignItems: "center",
       }}
     >
       <div
         style={{
-          height: "25%",
-          width: "80%",
+          height: 250,
+          width: "97%",
           display: "flex",
           flexDirection: "row",
-          justifyContent: "space-between",
+          gap: 20,
+          justifyContent: "center",
           alignItems: "center",
+          marginTop: 100,
         }}
       >
         {cardsInHand}
       </div>
-      {playerState?.board && <Board model={playerState?.board}></Board>}
+      {playerState?.board && (
+        <SideBoard isLeft={true} model={playerState?.board} />
+      )}
+      {playerState?.board && (
+        <SideBoard isLeft={false} model={playerState?.board} />
+      )}
+      {playerState?.board && <Board model={playerState?.board} />}
     </div>
   );
 };

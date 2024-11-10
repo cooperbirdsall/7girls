@@ -16,6 +16,13 @@ const Card = ({ playCard, model }: CardProps) => {
       }
       return images;
     } else if (gain.money) {
+      if (gain.money === 5) {
+        return (
+          <img className="gain-icon" src={resources["COIN5"]} alt="5 coins" />
+        );
+      } else {
+        return <p>money icon doesn't exist for this</p>;
+      }
       return <div></div>;
     } else if (gain.points) {
       return <div></div>;

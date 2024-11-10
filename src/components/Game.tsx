@@ -12,6 +12,7 @@ const Game = () => {
 
   const [age, setAge] = useState(1);
   const [playerState, setPlayerState] = useState<PlayerState>();
+  const [gameState, setGameState] = useState<GameState>();
 
   useEffect(() => {
     socket.emit("getGameState", { gameID: roomID });
@@ -29,6 +30,7 @@ const Game = () => {
           console.log(response.gameState);
           const playerState = response.gameState.players[socket.id];
           setPlayerState(playerState);
+          setGameState(response.gameState);
         }
       }
     );
@@ -99,15 +101,18 @@ const Game = () => {
       }
     }
     if (card.cost.resource) {
-      if(hasEnoughResources(playerState.board, card.cost.resource)) {
+      if (hasEnoughResources(playerState.board, card.cost.resource)) {
         console.log("can afford (have enough resources!)");
         return;
       }
-      let missingResources = getMissingResources(playerState.board, card.cost.resource);
-      console.log('missing resources: %v', missingResources);
+      let missingResources = getMissingResources(
+        playerState.board,
+        card.cost.resource
+      );
+      console.log("missing resources: %v", missingResources);
 
       // TODO: i'm too lazy to wire in the playerstates and finish this
-      // now we have to pass the left & right players to 
+      // now we have to pass the left & right players to
       // something like getSellableResources(left)
       // getSellableResources(right)
 

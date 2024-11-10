@@ -2,18 +2,16 @@ import React, { useEffect, useState } from "react";
 import Board from "./Board";
 import socket from "../socket";
 import { useParams } from "react-router-dom";
-import { GameState, PlayerState, Resource } from "../types";
+import { GameState, PlayerState, Resource, Money, CardCost } from "../types";
 import { CardModel } from "../models/CardModel";
-import { hasEnoughResources, getMissingResources } from "../models/BoardModel";
+import { getMissingResources } from "../models/BoardModel";
 import Card from "./Card";
-import SideBoard from "./SideBoard";
 
 const Game = () => {
   const { roomID } = useParams();
 
   const [age, setAge] = useState(1);
   const [playerState, setPlayerState] = useState<PlayerState>();
-  const [gameState, setGameState] = useState<GameState>();
 
   useEffect(() => {
     socket.emit("getGameState", { gameID: roomID });
@@ -31,7 +29,6 @@ const Game = () => {
           console.log(response.gameState);
           const playerState = response.gameState.players[socket.id];
           setPlayerState(playerState);
-          setGameState(response.gameState);
         }
       }
     );
@@ -63,6 +60,26 @@ const Game = () => {
   const playCard = (card: CardModel) => {
     if (!playerState || !playerState.board) return;
 
+    // TODO: this is just placeholder for now
+    // we should get the players payment in gamestate
+
+    let payment: CardCost = {
+      resource: [],
+      money: 10,
+    }
+
+    // is card free
+    if (
+      (!card.cost.resource || card.cost.resource.length === 0) &&
+      !card.cost.money
+    ) {
+      // can afford card too ! (no spending)
+      console.log("can afford (card does nont cost anything)!");
+      socket.emit("playCard", { card: card, moneyCost: 0 });
+      return;
+    }
+
+    // do we have free from symbol?
     if (card.cost.symbol) {
       for (let cardPlayed of playerState.board.cardsPlayed ?? []) {
         if (cardPlayed.gain.symbol) {
@@ -78,70 +95,37 @@ const Game = () => {
       }
     }
 
-    if (
-      (!card.cost.resource || card.cost.resource.length === 0) &&
-      !card.cost.money
-    ) {
-      // can afford card too ! (no spending)
-      console.log("can afford (card does nont cost anything)!");
-      socket.emit("playCard", { card: card, moneyCost: 0 });
-      return;
-    }
 
+    // do we have enough money to pay for this?
     if (card.cost.money) {
       if (card.cost.money <= playerState.board.money) {
         // can afford money cost ! (spend money)
-        if (!card.cost.resource) {
-          console.log("can afford (spend money to buy)!");
-          socket.emit("playCard", {
-            card: card,
-            moneyCost: card.cost.money,
-          });
-          return;
-        }
-      }
-    }
-    if (card.cost.resource) {
-      if (hasEnoughResources(playerState.board, card.cost.resource)) {
-        console.log("can afford (have enough resources!)");
+        console.log("can afford (spend money to buy)!");
+        socket.emit("playCard", {
+          card: card,
+          moneyCost: payment.money,
+        });
         return;
       }
-      let missingResources = getMissingResources(
-        playerState.board,
-        card.cost.resource
-      );
-      console.log("missing resources: %v", missingResources);
-
-      // TODO: i'm too lazy to wire in the playerstates and finish this
-      // now we have to pass the left & right players to
-      // something like getSellableResources(left)
-      // getSellableResources(right)
-
-      console.log("not doing that rn");
-
-      // MARK: Gain
-      // MARK: If card has action, play that
-      if (card.gain.nowAction) {
-        let action = card.gain.nowAction;
-        if (action.fromYou) {
-          playerState.board.money +=
-            playerState.cardsInHand?.filter(
-              (card) => card.color == action.forColor
-            ) * card.gain.money;
-        }
-        if (action.fromNeighbors) {
-          playerState.board.money +=
-            gameState?.players[playerState.playerOnLeft].cardsInHand?.filter(
-              (card) => card.color == action.forColor
-            ) * card.gain.money;
-          playerState.board.money +=
-            gameState?.players[playerState.playerOnRight].cardsInHand?.filter(
-              (card) => card.color == action.forColor
-            ) * card.gain.money;
-        }
-      }
     }
-  };
+
+    // do we have enough resources to pay for this?
+    if (payment.resource) {
+        // @ts-ignore
+        let missing = getMissingResources(playerState.board, payment.resource, card.cost.resource)
+        if (missing.length === 0) {
+          console.log("i have enough resources to pay for this %v", payment.resource)
+          socket.emit("playCard", {
+            card: card,
+            moneyCost: payment.money,
+          });
+        } else {
+          console.log("cannot afford, missing resources: %v", missing)
+        }
+    }
+
+    console.log("sorry girl, you're broke!")
+  }
 
   const cardsInHand = playerState?.cardsInHand.map((card) => {
     return <Card model={card} playCard={playCard} key={card.id} />;
@@ -154,31 +138,23 @@ const Game = () => {
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        justifyContent: "flex-start",
+        justifyContent: "center",
         alignItems: "center",
       }}
     >
       <div
         style={{
-          height: 250,
-          width: "97%",
+          height: "25%",
+          width: "80%",
           display: "flex",
           flexDirection: "row",
-          gap: 20,
-          justifyContent: "center",
+          justifyContent: "space-between",
           alignItems: "center",
-          marginTop: 100,
         }}
       >
         {cardsInHand}
       </div>
-      {playerState?.board && (
-        <SideBoard isLeft={true} model={playerState?.board} />
-      )}
-      {playerState?.board && (
-        <SideBoard isLeft={false} model={playerState?.board} />
-      )}
-      {playerState?.board && <Board model={playerState?.board} />}
+      {playerState?.board && <Board model={playerState?.board}></Board>}
     </div>
   );
 };

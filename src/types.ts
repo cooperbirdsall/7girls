@@ -4,38 +4,29 @@ import { CardModel } from "./models/CardModel";
 type BasicResource = "WOOD" | "ORE" | "STEEL" | "BRICK";
 type FancyResource = "GLASS" | "RUG" | "PAPER";
 
-//export type Color = "BROWN" | "ORANGE" | "GREEN" | "BLUE" | "GRAY" | "RED"
-
 export type OneOfResource = Resource[];
 export type OneOfScience = Science[];
 
 export type Resource = BasicResource | FancyResource | OneOfResource;
 
+export type Money = number;
+
 export type CardCost = {
   resource?: Resource[];
-  money?: number;
+  money?: Money;
   symbol?: Symbol;
 }
 
 export type CardGain = {
-  money?: number;
+  money?: Money;
   military?: number;
   resource?: Resource[];
-  science?: Science | OneOfScience;
-  nowAction?: CardAction;
-  endAction?: CardAction;
+  science?: Science;
+  func?: Function;
   points?: number;
   symbol?: Symbol[];
 };
 
-export type CardAction = {
-  forColor: string
-  fromNeighbors: boolean;
-  fromYou: boolean;
-  fromWonders: boolean;
-}
-
-// Gain # of Coins of color from you and your neighbors
 export type Symbol = 
   "HAMMER" |
   "RAINDROP" |
@@ -62,7 +53,7 @@ export type Symbol =
   "FORT" |
   "SPARTAN"
 
-export type Science = "WHEEL" | "PROTRACTOR" | "TABLET"
+export type Science = "WHEEL" | "PROTRACTOR" | "TABLET" | OneOfScience
 
 export type PyramidStage = {
   cost: Resource[];

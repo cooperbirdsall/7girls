@@ -6,6 +6,7 @@ import { GameState, PlayerState, Resource } from "../types";
 import { CardModel } from "../models/CardModel";
 import { hasEnoughResources, getMissingResources } from "../models/BoardModel";
 import Card from "./Card";
+import SideBoard from "./SideBoard";
 
 const Game = () => {
   const { roomID } = useParams();
@@ -117,6 +118,28 @@ const Game = () => {
       // getSellableResources(right)
 
       console.log("not doing that rn");
+
+      // MARK: Gain
+      // MARK: If card has action, play that
+      if (card.gain.nowAction) {
+        let action = card.gain.nowAction;
+        if (action.fromYou) {
+          playerState.board.money +=
+            playerState.cardsInHand?.filter(
+              (card) => card.color == action.forColor
+            ) * card.gain.money;
+        }
+        if (action.fromNeighbors) {
+          playerState.board.money +=
+            gameState?.players[playerState.playerOnLeft].cardsInHand?.filter(
+              (card) => card.color == action.forColor
+            ) * card.gain.money;
+          playerState.board.money +=
+            gameState?.players[playerState.playerOnRight].cardsInHand?.filter(
+              (card) => card.color == action.forColor
+            ) * card.gain.money;
+        }
+      }
     }
   };
 
@@ -131,24 +154,31 @@ const Game = () => {
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        justifyContent: "center",
+        justifyContent: "flex-start",
         alignItems: "center",
       }}
     >
       <div
         style={{
-          height: "25%",
+          height: 250,
           width: "97%",
           display: "flex",
           flexDirection: "row",
           gap: 20,
-          justifyContent: "space-between",
+          justifyContent: "center",
           alignItems: "center",
+          marginTop: 100,
         }}
       >
         {cardsInHand}
       </div>
-      {playerState?.board && <Board model={playerState?.board}></Board>}
+      {playerState?.board && (
+        <SideBoard isLeft={true} model={playerState?.board} />
+      )}
+      {playerState?.board && (
+        <SideBoard isLeft={false} model={playerState?.board} />
+      )}
+      {playerState?.board && <Board model={playerState?.board} />}
     </div>
   );
 };

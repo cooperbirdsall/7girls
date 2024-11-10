@@ -29,16 +29,16 @@
 }
 
 .card {
-  width: 200px;
+  min-width: 175px;
+  width: 175px;
   height: 250px;
   font-family: "Texturina";
   font-size: 20px;
-  background-color: white;
   border-radius: 11px;
   transition: ease-in 0.2s;
-  border: 3px solid black;
   z-index: 3;
   position: relative;
+  background-image: url(/src/assets/cards/card.png);
 }
 
 .card:hover {
@@ -52,6 +52,11 @@
   height: 50px;
 }
 
+.gain-icon-played {
+  width: 32px;
+  height: 32px;
+}
+
 .one-of-slash {
   font-size: 30px;
   font-weight: bold;
@@ -60,4 +65,37 @@
 .cost-icon {
   width: 24px;
   height: 24px;
+}
+
+.played-card {
+  width: 100px;
+  height: 60px;
+  position: relative;
+  background-size: cover;
+  background-image: url(/src/assets/cards/card.png);
+  margin-right: 3px;
+}
+
+.side-board {
+  width: 50px;
+  height: 500px;
+  background-color: pink;
+  position: absolute;
+  top: 10%;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.fancy-font {
+  font-family: "Texturina";
+}
+
+.side-card {
+  height: 100px;
+  width: 60px;
+  position: relative;
+  background-size: cover;
+  background-image: url(/src/assets/cards/card.png);
+  margin-bottom: 3px;
 }

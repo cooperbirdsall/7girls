@@ -1,5 +1,7 @@
 import { CardModel } from "../models/CardModel";
 import { CardCost, CardGain } from "../types";
+import { colors } from "../utils/cardColors";
+import gainIcon from "../utils/gainIcon";
 import { resources } from "../utils/resources";
 
 type CardProps = {
@@ -8,50 +10,6 @@ type CardProps = {
 };
 
 const Card = ({ playCard, model }: CardProps) => {
-  const gain = (gain: CardGain) => {
-    if (gain.military) {
-      const images = [];
-      for (let i = 0; i < gain.military; i++) {
-        images.push(<img src={resources["MILITARY"]} alt="Military" />);
-      }
-      return images;
-    } else if (gain.money) {
-      if (gain.money === 5) {
-        return (
-          <img className="gain-icon" src={resources["COIN5"]} alt="5 coins" />
-        );
-      } else {
-        return <p>money icon doesn't exist for this</p>;
-      }
-      return <div></div>;
-    } else if (gain.points) {
-      return <div></div>;
-    } else if (gain.resource) {
-      //if it's a OneOfResource
-      if (Array.isArray(gain.resource[0])) {
-        return gain.resource[0]
-          .map((res) => (
-            //@ts-ignore
-            <img className="gain-icon" src={resources[res]} alt={res} />
-          ))
-          .reduce((prev, curr) => (
-            <>
-              {prev} <p className="one-of-slash">/</p> {curr}
-            </>
-          ));
-      } else {
-        return gain.resource.map((res) => (
-          //@ts-ignore
-          <img className="gain-icon" src={resources[res]} alt={res} />
-        ));
-      }
-    } else if (gain.science) {
-      return <div></div>;
-    } else {
-      return <div>gain not supported</div>;
-    }
-  };
-
   const cost = (cost: CardCost) => {
     const images = [];
     if (cost.money) {
@@ -80,7 +38,7 @@ const Card = ({ playCard, model }: CardProps) => {
     >
       <div
         style={{
-          backgroundColor: model.color,
+          backgroundColor: colors[model.color],
           width: "100%",
           height: 50,
           display: "flex",
@@ -89,7 +47,7 @@ const Card = ({ playCard, model }: CardProps) => {
           borderRadius: "7.9px 7.9px 0 0",
         }}
       >
-        {gain(model.gain)}
+        {gainIcon(model.gain, false)}
       </div>
       <div
         style={{

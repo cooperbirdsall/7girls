@@ -4,6 +4,7 @@ import Card from "./Card";
 import { CardModel } from "../models/CardModel";
 import { BoardModel } from "../models/BoardModel";
 import { resources } from "../utils/resources";
+import PlayedCard from "./PlayedCard";
 
 const Board = (props: { model: BoardModel }) => {
   const [money, setMoney] = useState(3);
@@ -30,8 +31,14 @@ const Board = (props: { model: BoardModel }) => {
   };
 
   const resourceImage = () => {
-    //@ts-ignore
-    return <img src={resources[props.model?.startingResource]} />;
+    return (
+      <img
+        width={40}
+        height={40}
+        //@ts-ignore
+        src={resources[props.model?.startingResource]}
+      />
+    );
   };
 
   const canPlayCard = (card: CardModel) => {
@@ -64,31 +71,90 @@ const Board = (props: { model: BoardModel }) => {
     return true;
   };
 
-  const cardsPlayed = props.model.cardsPlayed.map((card) => {
-    return <Card model={card} playCard={() => {}} key={card.id} />;
+  const cardsPlayed = props.model.cardsPlayed.map((card, index) => {
+    return <PlayedCard model={card} index={index} key={card.id} />;
   });
 
+  const brownCardsPlayed = props.model.cardsPlayed
+    .filter((card) => card.color === "brown")
+    .map((card, index) => {
+      return <PlayedCard model={card} index={index} key={card.id} />;
+    });
+
+  const grayCardsPlayed = props.model.cardsPlayed
+    .filter((card) => card.color === "gray")
+    .map((card, index) => {
+      return <PlayedCard model={card} index={index} key={card.id} />;
+    });
+
+  const orangeCardsPlayed = props.model.cardsPlayed
+    .filter((card) => card.color === "orange")
+    .map((card, index) => {
+      return <PlayedCard model={card} index={index} key={card.id} />;
+    });
+
+  const blueCardsPlayed = props.model.cardsPlayed
+    .filter((card) => card.color === "blue")
+    .map((card, index) => {
+      return <PlayedCard model={card} index={index} key={card.id} />;
+    });
+
+  const greenCardsPlayed = props.model.cardsPlayed
+    .filter((card) => card.color === "green")
+    .map((card, index) => {
+      return <PlayedCard model={card} index={index} key={card.id} />;
+    });
+
+  const purpleCardsPlayed = props.model.cardsPlayed
+    .filter((card) => card.color === "purple")
+    .map((card, index) => {
+      return <PlayedCard model={card} index={index} key={card.id} />;
+    });
   return (
-    <div>
-      <div className="played-cards">
-        {/* <Card model={} playCard={handlePlayCard} /> */}
+    <div style={{ position: "absolute", bottom: 50, zIndex: 2 }}>
+      <div style={{ display: "flex" }}>
+        <div style={{ display: "flex", flexDirection: "column-reverse" }}>
+          {brownCardsPlayed}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column-reverse" }}>
+          {grayCardsPlayed}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column-reverse" }}>
+          {orangeCardsPlayed}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column-reverse" }}>
+          {blueCardsPlayed}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column-reverse" }}>
+          {greenCardsPlayed}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column-reverse" }}>
+          {purpleCardsPlayed}
+        </div>
       </div>
-      {cardsPlayed}
       <div
         className="board"
         style={{
-          width: 420,
+          width: 620,
           height: 200,
-          backgroundColor: "gray",
+          backgroundColor: "pink",
           borderRadius: 10,
+          position: "relative",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent: "flex-end",
         }}
       >
-        <p>{props.model?.name}</p>
-        <p>starting resource: {resourceImage()}</p>
+        <div style={{ position: "absolute", top: 10, left: 10 }}>
+          {resourceImage()}
+        </div>
+        <p
+          className="fancy-font"
+          style={{ fontSize: 40, margin: "0px 0px 5px 0px" }}
+        >
+          {props.model?.name}
+        </p>
       </div>
       <div className="tucked-cards"></div>
     </div>

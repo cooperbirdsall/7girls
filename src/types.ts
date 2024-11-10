@@ -4,6 +4,8 @@ import { CardModel } from "./models/CardModel";
 type BasicResource = "WOOD" | "ORE" | "STEEL" | "BRICK";
 type FancyResource = "GLASS" | "RUG" | "PAPER";
 
+//export type Color = "BROWN" | "ORANGE" | "GREEN" | "BLUE" | "GRAY" | "RED"
+
 export type OneOfResource = Resource[];
 export type OneOfScience = Science[];
 
@@ -20,11 +22,20 @@ export type CardGain = {
   military?: number;
   resource?: Resource[];
   science?: Science | OneOfScience;
-  func?: Function;
+  nowAction?: CardAction;
+  endAction?: CardAction;
   points?: number;
   symbol?: Symbol[];
 };
 
+export type CardAction = {
+  forColor: string
+  fromNeighbors: boolean;
+  fromYou: boolean;
+  fromWonders: boolean;
+}
+
+// Gain # of Coins of color from you and your neighbors
 export type Symbol = 
   "HAMMER" |
   "RAINDROP" |

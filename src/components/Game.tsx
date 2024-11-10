@@ -16,6 +16,16 @@ const Game = () => {
   const [playerState, setPlayerState] = useState<PlayerState>();
 
   useEffect(() => {
+    const sessionID = sessionStorage.getItem("sessionID");
+    if (sessionID) {
+      socket.auth = { sessionID };
+      socket.connect();
+    }
+
+    socket.on("session", ({ sessionID, userID }) => {
+      socket.userID = userID;
+    });
+
     socket.emit("getGameState", { gameID: roomID });
 
     socket.on(
@@ -29,7 +39,7 @@ const Game = () => {
           console.log(response.error);
         } else {
           console.log(response.gameState);
-          const playerState = response.gameState.players[socket.id];
+          const playerState = response.gameState.players[socket.userID ?? ""];
           setPlayerState(playerState);
           setGameState(response.gameState);
         }
@@ -47,8 +57,9 @@ const Game = () => {
         success?: boolean;
         error?: string;
       }) => {
+        console.log("turn finished");
         console.log(response.gameState);
-        const playerState = response.gameState.players[socket.id];
+        const playerState = response.gameState.players[socket.userID ?? ""];
         setPlayerState(playerState);
       }
     );

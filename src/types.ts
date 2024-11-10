@@ -69,7 +69,7 @@ export type PyramidStage = {
 }
 
 export type PlayerState = {
-  socketID: string;
+  socketUserID: string;
   name: string | undefined;
   isReady: boolean;
   board: BoardModel | undefined;

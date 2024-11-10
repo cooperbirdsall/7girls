@@ -8,6 +8,7 @@ import { createGameState, createPlayerState, handleCardPlayed, initializeGame } 
 import { Socket } from 'socket.io';
 import { GameState, PlayerState } from '../../src/types';
 import { CardModel } from '../../src/models/CardModel';
+import { InMemorySessionStore } from './sessionStore';
 
 const app = express()
 
@@ -20,6 +21,13 @@ const server = http.createServer(app);
 const io = require('socket.io')(server, { 
   cors: { origin: "*" }
 });
+
+const sessionStore = new InMemorySessionStore();
+
+interface MySocket extends Socket {
+    sessionID: string;
+    userID: string;
+}
 
 // Serve the static files from the React app
 app.use(express.static(path.join(__dirname, '../build')));
@@ -63,17 +71,57 @@ const games: {[key:string]: GameState} = {};
 const nextGameStates: {[key:string]: GameState} = {};
 const socketToGameMap: {[key:string]: string} = {};
 
+io.use((socket : MySocket, next: Function) => {
+    const sessionID = socket.handshake.auth.sessionID;
+    console.log(`Socket ${socket.id} connected using session ${sessionID}.`);
+    if (sessionID) {
+      // find existing session
+      const session = sessionStore.findSession(sessionID);
+      if (session) {
+        console.log(`Session id found, user id is ${session.userID}`);
+        socket.sessionID = sessionID;
+        socket.userID = session.userID;
+        return next();
+      }
+    }
+
+    // create new session
+    socket.sessionID = socket.sessionID ?? crypto.randomBytes(3).toString('hex');
+    console.log(`creating new session ${socket.sessionID}`);
+    socket.userID = crypto.randomBytes(3).toString('hex');
+    next();
+  });
+
 // IO handler for new socket connection
-io.on('connection', (socket : Socket) => {
+io.on('connection', (socket : MySocket) => {
     console.log(`Socket ${socket.id} connected.`);
+    
+    console.log(`Saving session ${socket.sessionID}`);
+    // persist session
+    sessionStore.saveSession(socket.sessionID, {
+        userID: socket.userID,
+        // username: socket.username,
+        connected: true,
+    });
+
+    // emit session details
+    socket.emit("session", {
+        sessionID: socket.sessionID,
+        userID: socket.userID,
+    });
+
+    // join game
+    if (socket.userID in Object.keys(socketToGameMap)) {
+        socket.join(socketToGameMap[socket.userID]);
+    }
 
      // Event handler for creating a game room
     socket.on("createGameRoom", () => {
         const gameID = crypto.randomBytes(3).toString('hex');
         const gameState = createGameState(gameID);
 
-        gameState.players[socket.id] = createPlayerState(socket.id);
-        socketToGameMap[socket.id] = gameID;
+        gameState.players[socket.userID] = createPlayerState(socket.userID);
+        socketToGameMap[socket.userID] = gameID;
         games[gameID] = gameState;
         socket.join(gameID);
         
@@ -90,8 +138,8 @@ io.on('connection', (socket : Socket) => {
             return;
         }
 
-        gameState.players[socket.id] = createPlayerState(socket.id);
-        socketToGameMap[socket.id] = gameID;
+        gameState.players[socket.userID] = createPlayerState(socket.userID);
+        socketToGameMap[socket.userID] = gameID;
 
         if (!socket.rooms.has(gameID)) {
             socket.join(gameID);
@@ -102,9 +150,9 @@ io.on('connection', (socket : Socket) => {
 
     // Event handler for when a player has joined a room and is ready
     socket.on("onPlayerReady", async (data: {name: string}) => {
-        const gameID = socketToGameMap[socket.id];
+        const gameID = socketToGameMap[socket.userID];
         const gameState = games[gameID];
-        const playerState = games[gameID].players[socket.id];
+        const playerState = games[gameID].players[socket.userID];
 
         if (!gameID || !gameState || !playerState) {
             console.error(`Error: Unable to join game ${gameID}.`);
@@ -120,7 +168,7 @@ io.on('connection', (socket : Socket) => {
 
     // Event handler for when a game creator player starts the game
     socket.on("onGameStart", async (data: {name: string}) => {
-        const gameID = socketToGameMap[socket.id];
+        const gameID = socketToGameMap[socket.userID];
         const gameState = games[gameID];
 
         if (!gameID || !gameState) {
@@ -157,7 +205,7 @@ io.on('connection', (socket : Socket) => {
 
     // Event handler for when a player picks a card
     socket.on("playCard", (data : {card: CardModel, moneyCost: number}) => {
-        const gameID = socketToGameMap[socket.id];
+        const gameID = socketToGameMap[socket.userID];
         const gameState = games[gameID];
 
         if (!gameID || !gameState) {
@@ -170,21 +218,25 @@ io.on('connection', (socket : Socket) => {
             nextGameState = gameState;
         }
 
-        const turnEnded = handleCardPlayed(gameState, nextGameState, socket.id, data);
-
-        if (!turnEnded) {
-            socket.emit("waitingForAllPlayersToFinishTurn", {success: true});
-        } else {
-            delete nextGameStates[gameID];
-            io.to(gameID).emit("finishTurn", { gameState: games[gameID], success: true });
-        }
+        handleCardPlayed(gameState, nextGameState, socket.userID, data)
+            .then(turnEnded => {
+                if (!turnEnded) {
+                    console.log("emitting wait");
+                    socket.emit("waitingForAllPlayersToFinishTurn", {success: true});
+                } else {
+                    console.log("emitting turn finished");
+                    delete nextGameStates[gameID];
+                    io.to(gameID).emit("finishTurn", { gameState: games[gameID], success: true });
+                }
+            }
+        );
     });
 
     // Event handler for when a game has reached an end state
     socket.on("gameEnd", ({}) => {
-        const gameID = socketToGameMap[socket.id];
+        const gameID = socketToGameMap[socket.userID];
         const gameState = games[gameID];
-        const playerState = games[gameID].players[socket.id];
+        const playerState = games[gameID].players[socket.userID];
 
         if (playerState) {
             playerState.isReady = false;
@@ -196,16 +248,23 @@ io.on('connection', (socket : Socket) => {
 
     // Event handler for when a socket disconnects
     socket.on('disconnect', () => {
-    const gameID = socketToGameMap[socket.id];
-    const gameState = games[gameID];
-    if (gameID && gameState) {
-        delete games[gameID].players[socket.id]
-        if (Object.keys(gameState.players).length === 0) {
-            delete games[gameID]
-        }
-        delete socketToGameMap[socket.id];
-    }
-    console.log(`Socket ${socket.id} disconnected.`);
+        // const gameID = socketToGameMap[socket.userID];
+        // const gameState = games[gameID];
+        // if (gameID && gameState) {
+        //     delete games[gameID].players[socket.userID]
+        //     if (Object.keys(gameState.players).length === 0) {
+        //         delete games[gameID]
+        //     }
+        //     delete socketToGameMap[socket.userID];
+        // }
+        console.log(`Socket ${socket.userID} disconnected.`);
+        // notify other users
+        socket.broadcast.emit("user disconnected", socket.userID);
+        // update the connection status of the session
+        sessionStore.saveSession(socket.sessionID, {
+            userID: socket.userID,
+            connected: false,
+        });
     });
 });
 

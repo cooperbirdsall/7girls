@@ -11,6 +11,12 @@ const Landing = () => {
 
   // Handle receiving the response for create room and join room
   useEffect(() => {
+    const sessionID = sessionStorage.getItem("sessionID");
+    if (sessionID) {
+      socket.auth = { sessionID };
+      socket.connect();
+    }
+
     socket.on("createRoomResponse", (response) => {
       if (response.success) {
         const roomID = response.gameID;
@@ -32,7 +38,17 @@ const Landing = () => {
       }
     });
 
+    socket.on("session", ({ sessionID, userID }) => {
+      // attach the session ID to the next reconnection attempts
+      socket.auth = { sessionID };
+      // store it in the localStorage
+      sessionStorage.setItem("sessionID", sessionID);
+      // save the ID of the user
+      socket.userID = userID;
+    });
+
     return () => {
+      socket.off("session");
       socket.off("createRoomResponse");
       socket.off("joinRoomResponse");
     };
@@ -60,7 +76,6 @@ const Landing = () => {
 
   const joinGame = () => {
     if (checkName() && checkGameCode()) {
-      console.log("emitting");
       socket.emit("joinGameRoom", { gameID: gameCode });
     }
   };

@@ -17,6 +17,12 @@ const Waiting = () => {
 
   // Handle receiving the response for create room and join room
   useEffect(() => {
+    const sessionID = sessionStorage.getItem("sessionID");
+    if (sessionID) {
+      socket.auth = { sessionID };
+      socket.connect();
+    }
+
     socket.emit("onPlayerReady", { name: name });
 
     socket.on("playerReadyResponse", (response) => {
@@ -34,7 +40,11 @@ const Waiting = () => {
       }
     });
 
-    return () => {};
+    return () => {
+      socket.off("session");
+      socket.off("playerReadyResponse");
+      socket.off("startGameSession");
+    };
   });
 
   const handleStartGame = () => {

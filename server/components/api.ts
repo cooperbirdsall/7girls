@@ -14,9 +14,9 @@ export const createGameState = (gameID: string) : GameState => {
     }
 }
 
-export const createPlayerState = (socketID: string) : PlayerState => {
+export const createPlayerState = (socketUserID: string) : PlayerState => {
     return {
-        socketID,
+        socketUserID,
         name: undefined,
         isReady: false,
         board: undefined,
@@ -74,7 +74,6 @@ export const handleCardPlayed = async (gameState: GameState, nextGameState: Game
         playerBoard.money -= cardData.moneyCost;
         playerBoard.cardsPlayed.push(cardData.card);
         nextGameState.players[playerID].cardsInHand = nextGameState.players[playerID].cardsInHand.filter((card) => card.id !== cardData.card.id);
-        console.log(nextGameState.players[playerID].cardsInHand)
     }
 
     gameState.players[playerID].waitingToPlayCard = false;
@@ -91,7 +90,9 @@ export const handleCardPlayed = async (gameState: GameState, nextGameState: Game
 
 export const endTurn = async (gameState: GameState, nextGameState: GameState) => {
     gameState = nextGameState;
-    // passCards(gameState);
+    if (Object.keys(gameState.players).length > 1) {
+        passCards(gameState);
+    }
 }
 
 /**
@@ -158,7 +159,7 @@ const dealHands = async (gameState: GameState) => {
 
     let dealtCards = new Set<number>();
     for (const player of Object.values(gameState.players)) {
-        for (let i = 0; i < 7; i++) {
+        for (let i = 0; i < 4; i++) {
             let nextCard;
             do {
                 nextCard = Math.floor(Math.random() * cards.length);

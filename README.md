@@ -8,6 +8,8 @@ In the project directory, you can run:
 
 ### `npx tsx server/components/server.ts`
 
+Runs the server
+
 ### `npm start`
 
 Runs the app in the development mode.\

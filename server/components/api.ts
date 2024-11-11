@@ -93,6 +93,8 @@ export const endTurn = async (gameState: GameState, nextGameState: GameState) =>
     if (Object.keys(gameState.players).length > 1) {
         passCards(gameState);
     }
+
+    startTurn(gameState);
 }
 
 /**

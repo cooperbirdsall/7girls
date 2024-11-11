@@ -111,7 +111,7 @@ const Board = (props: { model: BoardModel }) => {
       return <PlayedCard model={card} index={index} key={card.id} />;
     });
   return (
-    <div style={{ position: "absolute", bottom: 50, zIndex: 2 }}>
+    <div style={{ position: "absolute", bottom: 105, zIndex: 2 }}>
       <div style={{ display: "flex" }}>
         <div style={{ display: "flex", flexDirection: "column-reverse" }}>
           {brownCardsPlayed}
@@ -136,8 +136,8 @@ const Board = (props: { model: BoardModel }) => {
         className="board"
         style={{
           width: 620,
-          height: 200,
-          backgroundColor: "pink",
+          height: 170,
+          backgroundColor: "#939393",
           borderRadius: 10,
           position: "relative",
           display: "flex",

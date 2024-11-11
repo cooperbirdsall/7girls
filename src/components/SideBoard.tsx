@@ -3,11 +3,12 @@ import { resources } from "../utils/resources";
 import SideCard from "./SideCard";
 
 type SideBoardProps = {
+  totalNumPlayers: number;
   isLeft: boolean;
   model: BoardModel;
 };
 
-const SideBoard = ({ isLeft, model }: SideBoardProps) => {
+const SideBoard = ({ totalNumPlayers, isLeft, model }: SideBoardProps) => {
   const startingResource = () => {
     return (
       <img
@@ -73,9 +74,9 @@ const SideBoard = ({ isLeft, model }: SideBoardProps) => {
       style={{
         left: isLeft ? "20px" : "",
         right: isLeft ? "" : "20px",
-        height: "500px",
+        height: totalNumPlayers < 4 ? "580px" : "500px",
         position: "absolute",
-        top: "10%",
+        top: totalNumPlayers < 4 ? "10%" : "25%",
         display: "flex",
         flexDirection: isLeft ? "row" : "row-reverse",
       }}
@@ -86,7 +87,7 @@ const SideBoard = ({ isLeft, model }: SideBoardProps) => {
             width: "100%",
             display: "flex",
             justifyContent: "center",
-            marginTop: "9px",
+            marginTop: "12px",
           }}
         >
           {startingResource()}

@@ -157,7 +157,13 @@ const Game = () => {
       const leftPlayerBoard =
         gameState?.players[playerState?.playerOnLeft].board;
       if (leftPlayerBoard !== undefined) {
-        return <SideBoard isLeft={true} model={leftPlayerBoard} />;
+        return (
+          <SideBoard
+            totalNumPlayers={Object.keys(gameState?.players ?? []).length}
+            isLeft={true}
+            model={leftPlayerBoard}
+          />
+        );
       }
     }
   };
@@ -167,7 +173,13 @@ const Game = () => {
       const rightPlayerBoard =
         gameState?.players[playerState?.playerOnRight].board;
       if (rightPlayerBoard !== undefined) {
-        return <SideBoard isLeft={false} model={rightPlayerBoard} />;
+        return (
+          <SideBoard
+            totalNumPlayers={Object.keys(gameState?.players ?? []).length}
+            isLeft={false}
+            model={rightPlayerBoard}
+          />
+        );
       }
     }
   };
@@ -200,6 +212,60 @@ const Game = () => {
       {leftSideBoard()}
       {rightSideBoard()}
       {playerState?.board && <Board model={playerState?.board} />}
+      <div
+        style={{
+          width: "100%",
+          height: "60px",
+          display: "flex",
+          position: "absolute",
+          bottom: "24px",
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: "#f3f3f3",
+            height: "100%",
+            width: "100%",
+            margin: "12px",
+            borderRadius: "5px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-start",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#b8b8b8",
+              height: "36px",
+              minWidth: "200px",
+              width: "15%",
+              borderRadius: "5px",
+              marginLeft: "12px",
+            }}
+          ></div>
+          <div
+            style={{
+              backgroundColor: "#b8b8b8",
+              height: "36px",
+              minWidth: "350px",
+              width: "25%",
+              borderRadius: "5px",
+              marginLeft: "12px",
+            }}
+          ></div>
+          <div
+            style={{
+              backgroundColor: "#b8b8b8",
+              height: "36px",
+              minWidth: "350px",
+              width: "25%",
+              borderRadius: "5px",
+              marginRight: "12px",
+              marginLeft: "auto",
+            }}
+          ></div>
+        </div>
+      </div>
     </div>
   );
 };

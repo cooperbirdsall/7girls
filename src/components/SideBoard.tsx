@@ -69,30 +69,78 @@ const SideBoard = ({ isLeft, model }: SideBoardProps) => {
 
   return (
     <div
-      className="side-board"
+      className="side-player"
       style={{
         left: isLeft ? "20px" : "",
         right: isLeft ? "" : "20px",
+        height: "500px",
+        position: "absolute",
+        top: "10%",
+        display: "flex",
+        flexDirection: isLeft ? "row" : "row-reverse",
       }}
     >
-      {startingResource()}
-      <div style={{ display: "flex", flexDirection: "row" }}>
-        {brownCardsPlayed}
+      <div className="side-board">
+        <div
+          style={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            marginTop: "9px",
+          }}
+        >
+          {startingResource()}
+        </div>
       </div>
-      <div style={{ display: "flex", flexDirection: "row" }}>
-        {grayCardsPlayed}
-      </div>
-      <div style={{ display: "flex", flexDirection: "row" }}>
-        {orangeCardsPlayed}
-      </div>
-      <div style={{ display: "flex", flexDirection: "row" }}>
-        {blueCardsPlayed}
-      </div>
-      <div style={{ display: "flex", flexDirection: "row" }}>
-        {greenCardsPlayed}
-      </div>
-      <div style={{ display: "flex", flexDirection: "row" }}>
-        {purpleCardsPlayed}
+      <div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: isLeft ? "row" : "row-reverse",
+          }}
+        >
+          {brownCardsPlayed}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: isLeft ? "row" : "row-reverse",
+          }}
+        >
+          {grayCardsPlayed}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: isLeft ? "row" : "row-reverse",
+          }}
+        >
+          {orangeCardsPlayed}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: isLeft ? "row" : "row-reverse",
+          }}
+        >
+          {blueCardsPlayed}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: isLeft ? "row" : "row-reverse",
+          }}
+        >
+          {greenCardsPlayed}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: isLeft ? "row" : "row-reverse",
+          }}
+        >
+          {purpleCardsPlayed}
+        </div>
       </div>
     </div>
   );

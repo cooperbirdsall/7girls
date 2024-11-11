@@ -61,6 +61,7 @@ const Game = () => {
         console.log(response.gameState);
         const playerState = response.gameState.players[socket.userID ?? ""];
         setPlayerState(playerState);
+        setGameState(response.gameState);
       }
     );
 
@@ -151,6 +152,26 @@ const Game = () => {
     return <Card model={card} playCard={playCard} key={card.id} />;
   });
 
+  const leftSideBoard = () => {
+    if (playerState?.playerOnLeft) {
+      const leftPlayerBoard =
+        gameState?.players[playerState?.playerOnLeft].board;
+      if (leftPlayerBoard !== undefined) {
+        return <SideBoard isLeft={true} model={leftPlayerBoard} />;
+      }
+    }
+  };
+
+  const rightSideBoard = () => {
+    if (playerState?.playerOnRight) {
+      const rightPlayerBoard =
+        gameState?.players[playerState?.playerOnRight].board;
+      if (rightPlayerBoard !== undefined) {
+        return <SideBoard isLeft={false} model={rightPlayerBoard} />;
+      }
+    }
+  };
+
   return (
     <div
       className="game-container"
@@ -176,12 +197,8 @@ const Game = () => {
       >
         {cardsInHand}
       </div>
-      {playerState?.board && (
-        <SideBoard isLeft={true} model={playerState?.board} />
-      )}
-      {playerState?.board && (
-        <SideBoard isLeft={false} model={playerState?.board} />
-      )}
+      {leftSideBoard()}
+      {rightSideBoard()}
       {playerState?.board && <Board model={playerState?.board} />}
     </div>
   );

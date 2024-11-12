@@ -21,7 +21,7 @@ export const resources = {
     "RUG": rug,
     "GLASS": glass,
     "MILITARY": military,
-    "COIN": coinOne,
+    "COIN": coin,
     "COIN1": coinOne,
     "COIN2": coinTwo,
     "COIN3": coinThree,

@@ -174,7 +174,7 @@ const dealHands = async (gameState: GameState) => {
 }
 
 const passCards = async (gameState: GameState) => {
-    let newCards = new Map<string, CardModel[]>;
+    let newCards = new Map<string, CardModel[]>();
     for (const [playerID, player] of Object.entries(gameState.players)) {
         if (gameState.cardDirectionClockwise) {
             newCards.set(playerID, gameState.players[player.playerOnRight].cardsInHand ?? []);

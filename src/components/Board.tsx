@@ -37,6 +37,8 @@ const Board = (props: { model: BoardModel }) => {
         height={40}
         //@ts-ignore
         src={resources[props.model?.startingResource]}
+        //@ts-ignore
+        alt={resources[props.model?.startingResource]}
       />
     );
   };
@@ -110,6 +112,7 @@ const Board = (props: { model: BoardModel }) => {
     .map((card, index) => {
       return <PlayedCard model={card} index={index} key={card.id} />;
     });
+
   return (
     <div style={{ position: "absolute", bottom: 105, zIndex: 2 }}>
       <div style={{ display: "flex" }}>
@@ -155,6 +158,24 @@ const Board = (props: { model: BoardModel }) => {
         >
           {props.model?.name}
         </p>
+        <div
+          className="fancy-font"
+          style={{
+            position: "absolute",
+            top: 10,
+            right: 10,
+            fontWeight: "bold",
+          }}
+        >
+          <div style={{ display: "flex" }}>
+            <img src={resources["COIN"]} alt="COINS" />
+            {props.model.money}
+          </div>
+          <div style={{ display: "flex" }}>
+            <img src={resources["MILITARY"]} alt="MILITARY" />
+            {props.model.militaryPoints}
+          </div>
+        </div>
       </div>
       <div className="tucked-cards"></div>
     </div>
